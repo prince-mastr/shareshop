@@ -24,9 +24,9 @@ CONTENT_DIR = os.path.join(BASE_DIR, 'content')
 SECRET_KEY = '(^0%$)^#dpmg4o&-b4o-%$05gd!#1m_h$#wm$t_c$rny@zi91!'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['192.168.43.160']
+ALLOWED_HOSTS = ['192.168.43.160', "suratsaree.herokuapp.com/"]
 
 
 # Application definition
