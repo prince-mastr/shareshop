@@ -1,0 +1,26 @@
+{% extends 'layouts/default/page.html' %}
+
+{% load i18n %}
+
+{% block content %}
+
+    {% if request.user.is_authenticated %}
+
+        {% trans 'Your username is' %} <b>{{ request.user.username }}</b>.
+        <h2>Welcome to Makerobos Chat </h2>
+
+        What chat room would you like to enter?<br>
+        <h3 > User's Online</h1>
+        {% for user in user_list %}
+        <strong><a href="{% url 'room' user.username %}">{{user}}</a></strong> <br> 
+        <br>
+        {% endfor %}
+
+
+    {% else %}
+
+        {% trans 'You are a guest.' %}
+
+    {% endif %}
+
+{% endblock %}

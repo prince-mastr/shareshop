@@ -1,0 +1,1 @@
+web: gunicorn Cashbackclick.wsgi --log-file - --log-level debug
