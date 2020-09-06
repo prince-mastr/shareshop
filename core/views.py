@@ -343,9 +343,9 @@ class PaymentView(View):
         return redirect("/payment/stripe/")
 
 
+
 class HomeView(TemplateView):
-    def get(self, request, *args, **kwargs):
-        return render(request , "core/index.html")
+    template_name = "core/index.html"
 
 
 class OrderSummaryView(LoginRequiredMixin, View):

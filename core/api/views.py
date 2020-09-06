@@ -22,7 +22,7 @@ from .serializers import (
     ItemSerializer, OrderSerializer, ItemDetailSerializer, AddressSerializer,
     PaymentSerializer, ShareSerializer
 )
-from core.models import Item, OrderItem, Order, Address, Payment, Coupon, Refund, UserProfile, Variation, ItemVariation ,SharedItem,Share, Sharelist
+from core.models import Item, OrderItem, Order, Address, Payment, Coupon, Refund, UserProfile, Variation, ItemVariation ,SharedItem,Share, Sharelist, Category
 
 from django.http import HttpResponseRedirect
 from uuid import uuid4 
@@ -123,21 +123,26 @@ def add_to_cart(request, slug):
             order_item.quantity =  order_item.quantity  + 1
             order_item.save()
             messages.info(request, "This item quantity was updated.")
-            return redirect("product-list")
+            return redirect(request.META['HTTP_REFERER'])
         else:
             order.items.add(order_item)
             messages.info(request, "This item was added to your cart.")
-            return redirect("product-list")
+            return redirect(request.META['HTTP_REFERER'])
     else:
         ordered_date = timezone.now()
         order = Order.objects.create(
             user=request.user, ordered_date=ordered_date)
         order.items.add(order_item)
         messages.info(request, "This item was added to your cart.")
-        return redirect("product-list")
+        return redirect(request.META['HTTP_REFERER'])
+
+
+        
+    
+
 
 def add_to_share(request,slug):
-    item = get_object_or_404(Item, slug=slug)
+    item = get_object_or_404(Item, slug=slug,stock =True)
     share_item, created = SharedItem.objects.get_or_create(
         item=item,
         user=request.user,
@@ -146,7 +151,7 @@ def add_to_share(request,slug):
     share_qs = Share.objects.filter(user=request.user, shared=False)
     if share_qs.exists():
         messages.info(request, "This Quantity is Alredy Present.")
-        return redirect("product-list")
+        return redirect(request.META['HTTP_REFERER'])
         
     else:
         shared_date = timezone.now()
@@ -154,7 +159,28 @@ def add_to_share(request,slug):
             user=request.user, shared_date=shared_date)
         share.items.add(share_item)
         messages.info(request, "This item was added to your Sharelist")
-        return redirect("product-list")
+        return redirect(request.META['HTTP_REFERER'])
+
+def add_to_share_category(request,categoryid):
+    items = Item.objects.filter(category__id = categoryid, stock = True)
+    for item in items:
+        share_item, created = SharedItem.objects.get_or_create(
+        item=item,
+        user=request.user,
+        shared=False
+        )
+        share_qs = Share.objects.filter(user=request.user, shared=False)
+        if share_qs.exists():
+            messages.info(request, "This Quantity is Alredy Present.")
+            
+        else:
+            shared_date = timezone.now()
+            share = Share.objects.create(
+                user=request.user, shared_date=shared_date)
+            share.items.add(share_item)
+            messages.info(request, "This item was added to your Sharelist")
+    
+    return redirect(request.META['HTTP_REFERER'])
 
 class OrderItemDeleteView(DestroyAPIView):
     permission_classes = (IsAuthenticated, )
@@ -465,22 +491,28 @@ def QuantityUpdate(request):
 def Sharedlist(request):
     if request.method == 'POST':
         if "share" in request.POST:
-            share = Share.objects.get(id = request.POST["share"],shared = False)
-            share.shared = True
-            share.save()
-            user = User.objects.get(username = request.POST["shared_user"])
-            slug = str(uuid4())[:8]
-            Share_list = Sharelist.objects.create(
-                share = share,
-                shared_user = user,
-                slug = slug,
-                created_by = request.user
-            )
-            Share_list.save()
-            Share_list.get_absolute_url()
-            Share_list.url = request.build_absolute_uri(Share_list.get_absolute_url())
-            Share_list.save()
-            return render( request, 'core/share_now.html',{"url_for_share":Share_list.url})
+            share = Share.objects.get(id = request.POST["share"])
+            if share.shared:
+                Share_list = Sharelist.objects.get(share = share)
+                return render( request, 'core/share_now.html',{"url_for_share":Share_list.url})
+            else:
+                share.shared = True
+                share.save()
+                user = User.objects.get(username = request.POST["shared_user"])
+                slug = str(uuid4())[:8]
+                Share_list = Sharelist.objects.create(
+                    share = share,
+                    shared_user = user,
+                    slug = slug,
+                    created_by = request.user
+                )
+                Share_list.save()
+                Share_list.get_absolute_url()
+                Share_list.url = request.build_absolute_uri(Share_list.get_absolute_url())
+                Share_list.save()
+                return render( request, 'core/share_now.html',{"url_for_share":Share_list.url})
+        else:
+            return redirect('home')
 
 def PlaceOrder(request,pk):
     if request.method =="POST" :
@@ -576,3 +608,33 @@ class GeneratePdf(View):
             response['Content-Disposition'] = content
             return response
         return HttpResponse("Not found") 
+
+
+def Categorypage(request, *args, **kwargs):
+    if request.method == 'GET':
+        category_id = kwargs.get(
+            "categoryid",
+            None
+        )
+        category = Category.objects.get(id = category_id)
+        if request.user.userprofile.owner:
+            csrf_token = django.middleware.csrf.get_token(request) 
+            queryset = Item.objects.filter(stock = True, category__id = category_id)
+            return render(request,"core/products.html",{"object_list":queryset,
+            "csrf_token": csrf_token , "category" : category})
+        else:
+            csrf_token = django.middleware.csrf.get_token(request)
+            queryset = Sharelist.objects.filter(shared_user = request.user,share__shared = True ,)
+            items = []
+            for my_sharelist in queryset:
+                print()
+                for my_share_item in my_sharelist.share.items.all():
+                    if my_share_item.item.stock and my_share_item.item.category.id == category_id :
+                        items.append(my_share_item.item)
+            return render(request,"core/products.html",
+                {
+                    "object_list":set(items),
+                    "csrf_token": csrf_token,
+                    "category" : category
+                })
+            
