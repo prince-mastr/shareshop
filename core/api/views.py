@@ -24,9 +24,17 @@ from .serializers import (
 )
 from core.models import Item, OrderItem, Order, Address, Payment, Coupon, Refund, UserProfile, Variation, ItemVariation ,SharedItem,Share, Sharelist
 
-
+from django.http import HttpResponseRedirect
 from uuid import uuid4 
 import stripe
+from django.template.loader import get_template
+
+from django.http import HttpResponse
+from django.views.generic import View
+
+from core.api.utils import render_to_pdf #created in step 4
+
+import datetime
 
 #stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -37,19 +45,35 @@ class UserIDView(APIView):
 
 
 class ItemListView(ListAPIView):
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated, )
     serializer_class = ItemSerializer
-    queryset = Item.objects.all()
-    
     def get(self, request, *args, **kwargs):
-        csrf_token = django.middleware.csrf.get_token(request) 
-        queryset = Item.objects.all()
-        return render(request,"core/products.html",{"object_list":queryset,
-        "csrf_token": csrf_token})
+        print(request.user.userprofile.owner)
+        if request.user.userprofile.owner:
+            print("lznbkn;")
+            csrf_token = django.middleware.csrf.get_token(request) 
+            queryset = Item.objects.filter(stock = True)
+            return render(request,"core/products.html",{"object_list":queryset,
+            "csrf_token": csrf_token})
+        else:
+            print("zmnv ,b")
+            csrf_token = django.middleware.csrf.get_token(request)
+            queryset = Sharelist.objects.filter(shared_user = request.user,share__shared = True)
+            items = []
+            for my_sharelist in queryset:
+                print()
+                for my_share_item in my_sharelist.share.items.all():
+                    if my_share_item.item.stock:
+                        items.append(my_share_item.item)
+            return render(request,"core/products.html",{"object_list":set(items),
+            "csrf_token": csrf_token})
+            
+
 
 class ItemDetailView(generic.DetailView):
     model = Item
     template_name = "core/single.html"
+
 
 
 class OrderQuantityUpdateView(APIView):
@@ -195,15 +219,55 @@ class OrderDetailView(RetrieveAPIView):
 
     def get(self, *args, **kwargs):
         try:
+            address = Address.objects.filter(user = self.request.user)
             order = Order.objects.get(user=self.request.user, ordered=False)
-            print(list(order.items.all()))
             context = {
-                'object': order
+                'object': order,
+                "address_list": address
             }
             return render(self.request, 'core/checkout.html', context)
         except ObjectDoesNotExist:
             messages.warning(self.request, "You do not have an active order")
+            print("hero")
             return redirect("/")
+
+
+class DispatchDetailView(RetrieveAPIView):
+    serializer_class = OrderSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, *args, **kwargs):
+        try:
+            address = Address.objects.filter(user = self.request.user)
+            order = Order.objects.filter( ordered=True , dispatched = False )
+            my_order =[]
+            for check_order in order:
+                if check_order.get_total():
+                    my_order.append(check_order)
+                else:
+                    check_order.delete()
+            if len(my_order):
+                context = {
+                    'dispatch':1,
+                    'object': my_order,
+                    "address_list": address,
+                }
+            else:
+                context = {
+                    'no_order':1,
+                    'dispatch':1,
+                    'object': my_order,
+                    "address_list": address
+                }
+
+            return render(self.request, 'core/checkout.html', context)
+        except ObjectDoesNotExist:
+            messages.warning(self.request, "You do not have an active order")
+            print("hero")
+            return redirect("/")
+
+
+
 
 class ShareDetailView(RetrieveAPIView):
     serializer_class = ShareSerializer
@@ -385,19 +449,25 @@ def QuantityUpdate(request):
         if 'id' in request.POST:
             found_item = OrderItem.objects.get(id = request.POST["item"])
             found_order = Order.objects.get(id=request.POST["id"])
-            found_order.items.remove(found_item)
-            found_item.quantity = 1
-            found_item.save()
-            print(found_item.quantity)
-            found_order.save()
-            #print(found_order)
-
-        return HttpResponse('success') 
+            if int(request.POST["quantity"]):
+                found_item.quantity = request.POST["quantity"]
+                found_item.save()
+                found_order.save()
+            else:
+                found_order.items.remove(found_item)
+                found_item.quantity = 1
+                found_item.save()
+                found_order.save()
+        return redirect(request.META['HTTP_REFERER'])
+    else:
+        return redirect("index") 
 
 def Sharedlist(request):
     if request.method == 'POST':
         if "share" in request.POST:
-            share = Share.objects.get(id = request.POST["share"])
+            share = Share.objects.get(id = request.POST["share"],shared = False)
+            share.shared = True
+            share.save()
             user = User.objects.get(username = request.POST["shared_user"])
             slug = str(uuid4())[:8]
             Share_list = Sharelist.objects.create(
@@ -411,6 +481,55 @@ def Sharedlist(request):
             Share_list.url = request.build_absolute_uri(Share_list.get_absolute_url())
             Share_list.save()
             return render( request, 'core/share_now.html',{"url_for_share":Share_list.url})
+
+def PlaceOrder(request,pk):
+    if request.method =="POST" :
+        if "order" in request.POST:
+            order = Order.objects.get(id  = request.POST["order"])
+            billing_address_id = request.POST['shipping_address']
+            shipping_address_id = request.POST['billing_address']
+            billing_address = Address.objects.get(id=billing_address_id)
+            shipping_address = Address.objects.get(id=shipping_address_id)
+                
+            if not order.ordered:
+                for order_item in  order.items.all():
+                    order_item.ordered = True
+                    order.billing_address = billing_address
+                    order.billing_address = shipping_address
+                    order.ordered_date = datetime.date.today()
+                    order_item.save()
+                order.ordered = True
+                order.save()
+                return render( request, 'core/share_now.html',{"object":order})
+            else:
+                return redirect('index')
+
+        
+    else:
+        return redirect('index')
+
+def ProductStock(request,pk):
+    if request.method =="GET" :
+        item = Item.objects.get(id=pk)
+        item.stock = False
+        item.save()
+        return redirect(request.META['HTTP_REFERER'])
+    elif request.method == "POST":
+        item = Item.objects.get(id = request.POST["item"])
+        item.stock = False
+        item.save()
+        return redirect(request.META['HTTP_REFERER'])
+    else:
+        return redirect('index')
+
+
+def DispatchOrder(request,pk):
+    if request.method =="GET" :
+        order = Order.objects.get(id=pk)
+        return render( request, 'core/checkout.html',{'dispatch_final':1,"object":order})
+    else:
+        return redirect('index')
+
 
 class SharedlistDetailView(RetrieveAPIView):
     permission_classes = (IsAuthenticated,)
@@ -426,3 +545,34 @@ class SharedlistDetailView(RetrieveAPIView):
             messages.warning(self.request, "You do not have an active order")
             return redirect("/")
 
+
+
+
+class GeneratePdf(View):
+    def get(self, request, *args, **kwargs):
+        template = get_template('invoice.html')
+        orderid = kwargs.get(
+            "orderid",
+            None
+        )
+        order = Order.objects.get(id=orderid)
+        order.dispatched = True
+        order.save()
+        context = {
+            "customer_name": request.user.username,
+            "amount": order.get_total(),
+            "object" : order,
+        }
+        return render(request, "invoice.html",context)
+        html = template.render(context)
+        pdf = render_to_pdf('invoice.html', context)
+        if pdf:
+            response = HttpResponse(pdf, content_type='application/pdf')
+            filename = "Invoice_%s.pdf" %("12341231")
+            content = "inline; filename='%s'" %(filename)
+            download = request.GET.get("download")
+            if download:
+                content = "attachment; filename='%s'" %(filename)
+            response['Content-Disposition'] = content
+            return response
+        return HttpResponse("Not found") 

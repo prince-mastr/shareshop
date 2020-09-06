@@ -1,0 +1,66 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Dispatch Challan</title>
+    <link rel="stylesheet" href="{% static  'bill/style.css' %}" media="all" />
+  </head>
+  <body>
+    <header class="clearfix">
+      <div id="logo">
+        <img src="{% static  'bill/logo.png' %}">
+      </div>
+      <h1>INVOICE 3-2-1</h1>
+      <div id="company" class="clearfix">
+        <div>Company Name</div>
+        <div>455 Foggy Heights,<br /> AZ 85004, US</div>
+        <div>(602) 519-0450</div>
+        <div><a href="mailto:company@example.com">company@example.com</a></div>
+      </div>
+      <div id="project">
+        <div><span>Order_id</span> {{object.id}}</div>
+        <div><span>CLIENT</span> {{ object.user.username}}</div>
+        <div><span>ADDRESS</span> {{object.billing_address}}</div>
+        <div><span>EMAIL</span> <a href="mailto:{{object.user.email}}">{{object.user.email}}</a></div>
+        <div><span>DATE</span> {{ object.ordered_date}}</div>
+        <div><span>DUE DATE</span> ######## </div>
+      </div>
+    </header>
+    <main>
+      <table>
+        <thead>
+          <tr>
+            <th class="service">SL.NO</th>
+            <th class="desc">Product_id</th>
+            <th>Product_name</th>
+            <th>QTY</th>
+            <th>TOTAL</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in object.items.all %}
+          <tr>
+            <td class="service">{{forloop.counter}}</td>
+            <td class="desc">{{item.item.title}}</td>
+            <td class="unit">{{item.item.id}}</td>
+            <td class="qty">{{item.quantity}}</td>
+            <td class="total">{{ item.get_total_item_price }}</td>
+          </tr>
+          {% endfor %}
+          <tr>
+            <td colspan="4" class="grand total">GRAND TOTAL</td>
+            <td class="grand total">{{object.get_total}}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div id="notices">
+        <div>NOTICE:</div>
+        <div class="notice">A finance charge of 1.5% will be made on unpaid balances after 30 days.</div>
+      </div>
+    </main>
+    <footer>
+      Invoice was created on a computer and is valid without the signature and seal.
+    </footer>
+  </body>
+</html>

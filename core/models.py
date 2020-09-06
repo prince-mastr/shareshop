@@ -60,6 +60,7 @@ class Item(models.Model):
     category = models.ForeignKey('Category', null=True, blank=True,on_delete= models.CASCADE)
     label = models.CharField(choices=LABEL_CHOICES, max_length=1)
     slug = models.SlugField()
+    stock = models.BooleanField(default=True)
     description = models.TextField()
     image = models.ImageField()
 
@@ -86,6 +87,12 @@ class Item(models.Model):
         return reverse("core:remove-from-cart", kwargs={
             'slug': self.slug
         })
+    def out_of_stock(self):
+        return reverse("out-of-stock", kwargs={
+            'pk': self.id,
+        })
+
+
 
 
 class Variation(models.Model):
@@ -173,6 +180,7 @@ class Order(models.Model):
     start_date = models.DateTimeField(auto_now_add=True)
     ordered_date = models.DateTimeField()
     ordered = models.BooleanField(default=False)
+    dispatched = models.BooleanField(default=False)
     shipping_address = models.ForeignKey(
         'Address', related_name='shipping_address', on_delete=models.SET_NULL, blank=True, null=True)
     billing_address = models.ForeignKey(
@@ -215,6 +223,7 @@ class Order(models.Model):
         if self.coupon:
             total -= self.coupon.amount
         return total
+
 
 
 class Address(models.Model):

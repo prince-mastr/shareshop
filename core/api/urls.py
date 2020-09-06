@@ -20,7 +20,12 @@ from core.api.views import (
     QuantityUpdate,
     ShareDetailView,
     Sharedlist,
-    SharedlistDetailView
+    SharedlistDetailView,
+    PlaceOrder,
+    DispatchDetailView,
+    DispatchOrder,
+    ProductStock,
+    GeneratePdf
 )
 
 
@@ -35,22 +40,28 @@ urlpatterns = [
          AddressDeleteView.as_view(), name='address-delete'),
     path('products/', ItemListView.as_view(), name='product-list'),
     path('products/<str:slug>/', ItemDetailView.as_view(), name='product-detail'),
+    path('product-out-of-stock/', ProductStock , name='out-of-stock'),
     #path('addtocart/', AddToCartView.as_view(), name='add_to_cart'),
     path('addtocart/<slug>/', add_to_cart, name='add-to-cart'),
     path('addtoshare/<slug>/', add_to_share, name='add-to-share'),
 
     path('order-summary/', OrderDetailView.as_view(), name='order-summary'),
     path('share-summary/', ShareDetailView.as_view(), name='share-summary'),
+    path('dispatch-list/', DispatchDetailView.as_view(), name='dispatch-summary'),
+    path('dispatch-summary/<pk>', DispatchOrder, name="dispatch-order"),
     path('checkout/', PaymentView.as_view(), name='checkout'),
     path('add-coupon/', AddCouponView.as_view(), name='add-coupon'),
     path('order-items/<pk>/delete/',
          OrderItemDeleteView.as_view(), name='order-item-delete'),
     path('order-item/update-quantity/',
          OrderQuantityUpdateView.as_view(), name='order-item-update-quantity'),
+    path('place_order/<pk>/', PlaceOrder, name="place-order-now"), 
     path('payments/', PaymentListView.as_view(), name='payment-list'),
     path('update-cart/', QuantityUpdate, name="quantityupdate"),
     path('share-list-url/', Sharedlist, name="share_list_url"),
-    path('share-list-url/<str:slug>', SharedlistDetailView.as_view(), name="share_list_url-detail")
+    path('share-list-url/<str:slug>', SharedlistDetailView.as_view(), name="share_list_url-detail"),
+    path('get-dispatch/<int:orderid>/',GeneratePdf.as_view(), name="generate_invoice_pdf")
+
 
 
 

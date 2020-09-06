@@ -24,7 +24,9 @@
 <!-- start-smoth-scrolling -->
 <script type="text/javascript" src="{% static 'js/move-top.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/easing.js' %}"></script>
-<script> URL = "{% url 'quantityupdate' %}"; </script>
+<script> URL = "{% url 'quantityupdate' %}";
+ </script>
+
 <script type="text/javascript">
 	jQuery(document).ready(function($) {
 		$(".scroll").click(function(event){		
@@ -35,18 +37,27 @@
 </script>
 
 <script>
-	function updatequantity(quantity,orderid,item){
+	function updatequantity(quantity,orderid,itemid){
 			var csrftoken = '{{ csrf_token }}';
 			var reciver = "{{ room_name}}";
 			var data = {
 				"id":orderid,
-				"item":item,
+				"item":itemid,
 				'quantity':quantity ,
 				"csrfmiddlewaretoken": csrftoken ,
 				"reciver": reciver
 			};
 			$.post(URL, data);
 		}
+	function outofstock(orderid,itemid){
+		var csrftoken = '{{ csrf_token }}';
+		var data = {
+			"id":orderid,
+			"pk":itemid,
+			"csrfmiddlewaretoken": csrftoken ,
+		};
+		$.post("{% url 'out-of-stock'  %}", data);
+	}
 	
 	
 	</script>
@@ -243,27 +254,202 @@
 		<div class="container">
 			<h2>Your shopping cart contains: <span>3 Products</span></h2>
 			<div class="checkout-right">
+				{% if dispatch %}
 				<table class="timetable_sub">
 					<thead>
 						<tr>
 							<th>SL No.</th>	
-							<th>Product</th>
-							<th>Quality</th>
-							<th>Product Name</th>
+							<th>Order_id</th>
+							<th>Order_date</th>
+							<th>Order From</th>
 						
 							<th>Price</th>
 							<th>Remove</th>
 						</tr>
 					</thead>
-					{{object}}
+					{% for item in object %}
+					<tr class="rem{{forloop.counter}}">
+						<td class="invert">{{forloop.counter}}</td>
+						<td class="invert" id = "product{{item.item.id}}">{{item.id}}</td>
+						<td class="invert">{{item.ordered_date}}</td>
+						<td class="invert">{{ item.user}}</td>
+						
+						<td class="invert" id="price{{item.item.id}}">{{ item.get_total }}</td>
+						<td class="invert">
+							<a href="{% url 'dispatch-order' item.id %}"> Dispatch </a>
+						</td>
+					</tr>
+					{% endfor %}
+								<!--quantity-->
+									<script>
+									{% for item in object.items.all %}
+									var id{{item.item.id}} = document.getElementById("product{{item.item.id}}").innerHTML;
+									var price{{item.item.id}} = document.getElementById("price{{item.item.id}}").innerHTML;
+									$('.value-plus').on('click', function(){
+										var divUpd = $(this).parent().find('.value'), newVal = parseInt(divUpd.text(), 10)+1;
+										
+										divUpd.text(newVal);
+										document.getElementById("price{{item.item.id}}").innerHTML = newVal*price{{item.item.id}};
+
+										updatequantity(newVal,{{object.id}},id{{item.item.id}});
+									});
+									 
+									$('.value-minus').on('click', function(){
+										var divUpd = $(this).parent().find('.value'), newVal = parseInt(divUpd.text(), 10)-1;
+										if(newVal>=1) 
+										{
+											document.getElementById("price{{item.item.id}}").innerHTML = newVal*price{{item.item.id}};
+											divUpd.text(newVal);
+										}
+										updatequantity(newVal,{{object.id}},{{item.id}});
+										
+									});
+									
+									{% endfor %}
+									</script>
+								<!--quantity-->
+				</table>
+				{% elif dispatch_final %}
+				<table class="timetable_sub">
+					<thead>
+						<tr>
+							<th>SL No.</th>	
+							<th>Product</th>
+							<th>Id</th>
+							<th>Quality</th>
+							<th>Product Name</th>
+							<th>Price</th>
+							<th>Remove</th>
+							<th>Stock</th>
+						</tr>
+					</thead>
+					{{object.items.all}}
 					{% for item in object.items.all %}
 					<tr class="rem{{forloop.counter}}">
 						<td class="invert">{{forloop.counter}}</td>
 						<td class="invert-image"><a href="single.html"><img src="images/3.png" alt=" " class="img-responsive" /></a></td>
+						<td class="invert" id = "product{{item.item.id}}">{{item.item.id}}</td>
 						<td class="invert">
 							 <div class="quantity"> 
+								<div class="quantity-select">                           
+									<div class="entry value-minus">&nbsp;</div>
+									<div class="entry value"><span>{{item.quantity}}</span></div>
+									<div class="entry value-plus active">&nbsp;</div>
+								</div>
 								 
-								{{item.quantity}}
+								
+							</div>
+						</td>
+						<td class="invert">{{ item.item.title }}</td>
+						
+						<td class="invert" id="price{{item.item.id}}">{{ item.get_total_item_price }}</td>
+						<td class="invert" >
+							<div class="rem">
+								<div class="close{{forloop.counter}}"> </div>
+							</div>
+							<script>$(document).ready(function(c) {
+								{% for item in object.items.all %}
+								$('.close{{forloop.counter}}').on('click', function(c){
+									
+									$('.rem{{forloop.counter}}').fadeOut('slow', function(c){
+										$('.rem{{forloop.counter}}').remove();
+									});
+									var id = "{{object.id}}";
+									var orderitem = '{{item.id}}';
+									updatequantity(0,id,orderitem);
+									
+									});	  
+									{% endfor %}
+									
+								});
+						   </script>
+						</a></td>
+						<td class="invert" >
+							<div class="rem">
+								<div class="close{{forloop.counter}}"> </div>
+							</div>
+							<script>$(document).ready(function(c) {
+								{% for item in object.items.all %}
+								$('.close{{forloop.counter}}').on('click', function(c){
+									
+									$('.rem{{forloop.counter}}').fadeOut('slow', function(c){
+										$('.rem{{forloop.counter}}').remove();
+									});
+									var id = "{{object.id}}";
+									var orderitem = '{{item.id}}';
+									var id = "{{object.id}}";
+									var orderitem = '{{item.id}}';
+
+									updatequantity(0,id,orderitem);
+									outofstock(id,orderitem)									
+									});	  
+									{% endfor %}
+									
+								});
+						   </script>
+						</a></td>
+
+					</tr>
+					{% endfor %}
+								<!--quantity-->
+									<script>
+									{% for item in object.items.all %}
+									var id{{item.item.id}} = document.getElementById("product{{item.item.id}}").innerHTML;
+									var price{{item.item.id}} = document.getElementById("price{{item.item.id}}").innerHTML;
+									$('.value-plus').on('click', function(){
+										var divUpd = $(this).parent().find('.value'), newVal = parseInt(divUpd.text(), 10)+1;
+										
+										divUpd.text(newVal);
+										document.getElementById("price{{item.item.id}}").innerHTML = newVal*price{{item.item.id}};
+
+										updatequantity(newVal,{{object.id}},id{{item.item.id}});
+									});
+									 
+									$('.value-minus').on('click', function(){
+										var divUpd = $(this).parent().find('.value'), newVal = parseInt(divUpd.text(), 10)-1;
+										if(newVal>=1) 
+										{
+											document.getElementById("price{{item.item.id}}").innerHTML = newVal*price{{item.item.id}};
+											divUpd.text(newVal);
+										}
+										updatequantity(newVal,{{object.id}},{{item.id}});
+										
+									});
+									
+									{% endfor %}
+									</script>
+								<!--quantity-->
+				</table>
+				<div class="checkout-right-basket">
+					<a href="{% url 'generate_invoice_pdf' object.id %}"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Dispatch Chalan</a>
+				</div>
+				{% else %}
+				<table class="timetable_sub">
+					<thead>
+						<tr>
+							<th>SL No.</th>	
+							<th>Product</th>
+							<th>Product_id</th>
+							<th>Quality</th>
+							<th>Product Name</th>
+							<th>Price</th>
+							<th>Remove</th>
+							<th>Stock</th>
+						</tr>
+					</thead>
+					{{object.items.all}}
+					{% for item in object.items.all %}
+					<tr class="rem{{forloop.counter}}">
+						<td class="invert">{{forloop.counter}}</td>
+						<td class="invert-image"><a href="single.html"><img src="images/3.png" alt=" " class="img-responsive" /></a></td>
+						<td class="invert" id = "product{{item.item.id}}">{{item.item.id}}</td>
+						<td class="invert">
+							 <div class="quantity"> 
+								<div class="quantity-select">                           
+									<div class="entry value-minus">&nbsp;</div>
+									<div class="entry value"><span>{{item.quantity}}</span></div>
+									<div class="entry value-plus active">&nbsp;</div>
+								</div>
 							</div>
 						</td>
 						<td class="invert">{{ item.item.title }}</td>
@@ -280,32 +466,47 @@
 									$('.rem{{forloop.counter}}').fadeOut('slow', function(c){
 										$('.rem{{forloop.counter}}').remove();
 									});
-									var id = "{{object.id}}"
-									var orderitem = '{{item.id}}'
+									var id = "{{object.id}}";
+									var orderitem = '{{item.id}}';
 									updatequantity(0,id,orderitem);
 									});	  
 									{% endfor %}
 									
 								});
-						   </script>
-						</td>
+						   </script></td>
+
 					</tr>
 					{% endfor %}
 								<!--quantity-->
 									<script>
+									{% for item in object.items.all %}
+									var id{{item.item.id}} = document.getElementById("product{{item.item.id}}").innerHTML;
+									var price{{item.item.id}} = document.getElementById("price{{item.item.id}}").innerHTML;
 									$('.value-plus').on('click', function(){
 										var divUpd = $(this).parent().find('.value'), newVal = parseInt(divUpd.text(), 10)+1;
+										
 										divUpd.text(newVal);
+										document.getElementById("price{{item.item.id}}").innerHTML = newVal*price{{item.item.id}};
+
+										updatequantity(newVal,{{object.id}},id{{item.item.id}});
 									});
 									 
 									$('.value-minus').on('click', function(){
 										var divUpd = $(this).parent().find('.value'), newVal = parseInt(divUpd.text(), 10)-1;
-										if(newVal>=1) divUpd.text(newVal);
+										if(newVal>=1) 
+										{
+											document.getElementById("price{{item.item.id}}").innerHTML = newVal*price{{item.item.id}};
+											divUpd.text(newVal);
+										}
+										updatequantity(newVal,{{object.id}},{{item.id}});
+										
 									});
-
+									
+									{% endfor %}
 									</script>
 								<!--quantity-->
 				</table>
+				
 			</div>
 			<div class="checkout-left">	
 				<div class="checkout-left-basket">
@@ -320,9 +521,31 @@
 				</div>
 				<div class="checkout-right-basket">
 					<a href="single.html"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Continue Shopping</a>
+					{{  address_list }}
 				</div>
+				<form action="{% url 'place-order-now' object.id %}" method="post">
+					<fieldset>
+						<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+						<input type="hidden" name="order" value="{{object.id}}">
+						<select class="js-example-basic-single" name="shipping_address" id="brand">
+							<option value="Z">Select a Billing address</option>
+							{% for address in address_list %}
+							<option value="{{ address.id}}">{{ address.street_address }}</option>
+							{% endfor %}
+							</select>
+						<select class="js-example-basic-single" name="billing_address" id="brand">
+							<option value="Z">Select a Shipping Address</option>
+							{% for address in address_list %}
+							<option value="{{ address.id}}">{{ address.street_address }}</option>
+							{% endfor %}
+							</select>
+
+						<input type="submit" name="submit" value="Order_Now" class="button">
+					</fieldset>
+				</form>
 				<div class="clearfix"> </div>
 			</div>
+			{% endif %}
 		</div>
 	</div>
 <!-- //checkout -->
