@@ -1,5 +1,5 @@
 from core.models import Category
-from accounts.forms import SignIn
+from accounts.forms import SignInViaUsernameForm
 
 
 def add_variable_to_context(request):
@@ -10,5 +10,5 @@ def add_variable_to_context(request):
 
 def add_form_to_context(request):
     return {
-        'loginform': SignIn
+        'loginform': SignInViaUsernameForm
     }
