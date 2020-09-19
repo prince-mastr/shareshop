@@ -71,13 +71,13 @@
 						<div class="hover14 column">
 							<div class="agile_top_brand_left_grid">
 								<div class="agile_top_brand_left_grid_pos">
-									<img src="images/offer.png" alt=" " class="img-responsive">
+									<img src="{% static 'images/offer.png' %}" alt=" " class="img-responsive">
 								</div>
 								<div class="agile_top_brand_left_grid1">
 									<figure>
 										<div class="snipcart-item block">
 											<div class="snipcart-thumb">
-												<a href="{% url 'product-detail' object.slug %}"><img title=" " alt=" " src="{{object.image}}"></a>		
+												<a href="{% url 'product-detail' object.slug %}"><img title=" " alt=" " height="150" width="150" src="{{object.image.url}}"></a>		
 												<p>{{object.slug}}</Object></p>
 												
 												<h4>{{object.discount_price}} <span>{{object.price}}</span></h4>

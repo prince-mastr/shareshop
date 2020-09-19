@@ -17,7 +17,7 @@
 			<div class="agileinfo_single">
 				
 				<div class="col-md-4 agileinfo_single_left">
-					<img id="example" src="images/si1.jpg" alt=" " class="img-responsive">
+					<img id="example" src="{{object.image.url}}" alt=" " class="img-responsive">
 				</div>
 				<div class="col-md-8 agileinfo_single_right">
 				<h2>{{object.title}}</h2>
@@ -41,6 +41,33 @@
 							{{object.category.name}}</p>
 
 					</div>
+					<h2>Responsive Table</h2>
+							<div class="table-wrapper">
+								<table class="fl-table">
+									<thead>
+									<tr>
+										<th>Header 1</th>
+										<th>Header 2</th>
+										<th>Header 1</th>
+										<th>Header 2</th>
+										<th>Header 1</th>
+										<th>Header 2</th>
+									</tr>
+									</thead>
+									<tbody>
+									<tr>
+										<td>Content 1</td>
+										<td>Content 1</td>
+										<td>Content 1</td>
+										<td>Content 1</td>
+										<td>Content 1</td>
+										<td>Content 1</td>
+										
+									</tr>
+									
+									<tbody>
+								</table>
+							</div>
 					<div class="snipcart-item block">
 						<div class="snipcart-thumb agileinfo_single_right_snipcart">
 							<h4 class="m-sing">{{object.discount_price}}</h4> <span>{{object.price}}</span></h4>

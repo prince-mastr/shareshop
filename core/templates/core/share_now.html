@@ -19,12 +19,18 @@
 		<h2 class="w3_agile_header">Share_list_now</h2>
 			<div class="grid_3 grid_4 w3_agileits_icons_page">
 						<div class="icons">
-							{{ object }}
+							{% if order_placed %}
 							<section id="new">
-								<a href="whatsapp://send?text={{url_for_share}}" data-action="share/whatsapp/share">Share via Whatsapp</a>
-								<h3 class="page-header page-header icon-subheading"> {{url_for_share}} </h3>							 
+								<a href="whatsapp://send?text={{url_for_share}}" data-action="share/whatsapp/share">Order Placed</a>
+								<h3 class="page-header page-header icon-subheading"> </h3>							 
 
 								</section>
+								{% elif share_link %}
+								<section id="new">
+									<a href="whatsapp://send?text={{url_for_share}}" data-action="share/whatsapp/share">Share via Whatsapp</a>
+									<h3 class="page-header page-header icon-subheading"> {{url_for_share}} </h3>							 
+	
+									</section>
 						</div>
 					</div>
 		</div>	

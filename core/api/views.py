@@ -248,6 +248,7 @@ class OrderDetailView(RetrieveAPIView):
             address = Address.objects.filter(user = self.request.user)
             order = Order.objects.get(user=self.request.user, ordered=False)
             context = {
+                'order_placed': 1,
                 'object': order,
                 "address_list": address
             }
@@ -532,7 +533,7 @@ def PlaceOrder(request,pk):
                     order_item.save()
                 order.ordered = True
                 order.save()
-                return render( request, 'core/share_now.html',{"object":order})
+                return render( request, 'core/share_now.html',{"share_link" : 1,"object":order})
             else:
                 return redirect('index')
 

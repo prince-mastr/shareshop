@@ -194,19 +194,19 @@
 							<th>SL No.</th>	
 							<th>Product</th>
 							<th>Product_id</th>
+							<th >Required</th>
 							<th>Quality</th>
 							<th>Product Name</th>
 							<th>Price</th>
 							<th>Remove</th>
-							<th>Stock</th>
 						</tr>
 					</thead>
-					{{object.items.all}}
 					{% for item in object.items.all %}
 					<tr class="rem{{forloop.counter}}">
 						<td class="invert">{{forloop.counter}}</td>
-						<td class="invert-image"><a href="single.html"><img src="images/3.png" alt=" " class="img-responsive" /></a></td>
+						<td class="invert-image"><a href="single.html"><img src="{{item.item.image.url}}" alt=" " class="img-responsive" /></a></td>
 						<td class="invert" id = "product{{item.item.id}}">{{item.item.id}}</td>
+						<td class="invert" >{{ item.quantity }}</td>
 						<td class="invert">
 							 <div class="quantity"> 
 								<div class="quantity-select">                           
@@ -219,6 +219,7 @@
 						<td class="invert">{{ item.item.title }}</td>
 						
 						<td class="invert" id="price{{item.item.id}}">{{ item.get_total_item_price }}</td>
+						
 						<td class="invert">
 							<div class="rem">
 								<div class="close{{forloop.counter}}"> </div>
@@ -285,7 +286,6 @@
 				</div>
 				<div class="checkout-right-basket">
 					<a href="single.html"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Continue Shopping</a>
-					{{  address_list }}
 				</div>
 				<form action="{% url 'place-order-now' object.id %}" method="post">
 					<fieldset>
@@ -296,7 +296,7 @@
 							{% for address in address_list %}
 							<option value="{{ address.id}}">{{ address.street_address }}</option>
 							{% endfor %}
-							</select>
+							</select> <br>
 						<select class="js-example-basic-single" name="billing_address" id="brand">
 							<option value="Z">Select a Shipping Address</option>
 							{% for address in address_list %}
