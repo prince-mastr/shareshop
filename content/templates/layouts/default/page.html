@@ -88,6 +88,8 @@ Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, Sony
 	</div>
 <!-- //header -->
 <!-- navigation -->
+{% if request.user.is_authenticated %}
+
 	<div class="navigation-agileits">
 		<div class="container">
 			<nav class="navbar navbar-default">
@@ -134,7 +136,7 @@ Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, Sony
 							</nav>
 			</div>
 		</div>
-		
+{% endif %}
 <!-- //navigation -->
 
 
