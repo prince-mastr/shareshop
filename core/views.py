@@ -345,7 +345,12 @@ class PaymentView(View):
 
 
 class HomeView(TemplateView):
-    template_name = "core/index.html"
+    def get(request):
+        template_name = "core/index.html"
+    def post(request):
+        template_name = "core/index.html"
+
+
 
 
 class OrderSummaryView(LoginRequiredMixin, View):

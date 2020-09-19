@@ -15,6 +15,7 @@ class UserCacheMixin:
 
 
 class SignIn(UserCacheMixin, forms.Form):
+    
     password = forms.CharField(label=_('Password'), strip=False, widget=forms.PasswordInput)
 
     def __init__(self, *args, **kwargs):
