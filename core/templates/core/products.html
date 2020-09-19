@@ -29,6 +29,14 @@
 							<ul>
 								{% for child in category.children.all %}
 								<li><a href="{% url 'category-page' child.id %}"><i class="fa fa-arrow-right" aria-hidden="true"></i>{{child.name}}</a></li>
+								{% if child.children %}
+								<li><a href="{% url 'category-page' category.id %}"><i class="fa fa-arrow-right" aria-hidden="true"></i>{{category.name}}</a></li>
+								<ul>
+								{% for child in category.children.all %}
+								<li><a href="{% url 'category-page' child.id %}"><i class="fa fa-arrow-right" aria-hidden="true"></i>{{child.name}}</a></li>
+								{% endfor %}
+								</ul>
+								{% endif %}
 								{% endfor %}
 							</ul>
 						{% endif %}
