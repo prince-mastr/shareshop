@@ -79,6 +79,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'Cashbackclick.context_processor.add_variable_to_context',
+                'Cashbackclick.context_processor.add_form_to_context',
             ],
         },
     },
