@@ -146,12 +146,15 @@ Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, Sony
         No content.
     {% endblock %}
 {% else %}
-
+<!-- login -->
+<div class="login">
+	<div class="container">
 <ul>
 	<li><a href="{% url  'accounts:sign_up' %}"> Create Account </a></li>
 	<li><a href="{% url  'accounts:log_in' %}">Login</a></li>
 </ul>
-	
+	</div>
+</div>	
 {% endif %}
 <!-- //footer -->
 <div class="footer">
