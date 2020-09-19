@@ -617,24 +617,27 @@ def Categorypage(request, *args, **kwargs):
             None
         )
         category = Category.objects.get(id = category_id)
-        if request.user.userprofile.owner:
-            csrf_token = django.middleware.csrf.get_token(request) 
-            queryset = Item.objects.filter(stock = True, category__id = category_id)
-            return render(request,"core/products.html",{"object_list":queryset,
-            "csrf_token": csrf_token , "category" : category})
+        if request.user.is_authenticated:
+            if request.user.userprofile.owner:
+                csrf_token = django.middleware.csrf.get_token(request) 
+                queryset = Item.objects.filter(stock = True, category__id = category_id)
+                return render(request,"core/products.html",{"object_list":queryset,
+                "csrf_token": csrf_token , "category" : category})
+            else:
+                csrf_token = django.middleware.csrf.get_token(request)
+                queryset = Sharelist.objects.filter(shared_user = request.user,share__shared = True ,)
+                items = []
+                for my_sharelist in queryset:
+                    print()
+                    for my_share_item in my_sharelist.share.items.all():
+                        if my_share_item.item.stock and my_share_item.item.category.id == category_id :
+                            items.append(my_share_item.item)
+                return render(request,"core/products.html",
+                    {
+                        "object_list":set(items),
+                        "csrf_token": csrf_token,
+                        "category" : category
+                    })
         else:
-            csrf_token = django.middleware.csrf.get_token(request)
-            queryset = Sharelist.objects.filter(shared_user = request.user,share__shared = True ,)
-            items = []
-            for my_sharelist in queryset:
-                print()
-                for my_share_item in my_sharelist.share.items.all():
-                    if my_share_item.item.stock and my_share_item.item.category.id == category_id :
-                        items.append(my_share_item.item)
-            return render(request,"core/products.html",
-                {
-                    "object_list":set(items),
-                    "csrf_token": csrf_token,
-                    "category" : category
-                })
+            return redirect('index')
             
