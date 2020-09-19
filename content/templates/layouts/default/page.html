@@ -138,13 +138,40 @@ Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, Sony
 <!-- //navigation -->
 
 
-
+{% if request.user.is_authenticated %}
 
     {% block content %}
         No content.
     {% endblock %}
-
-
+{% else %}
+	<!-- breadcrumbs -->
+	<div class="breadcrumbs">
+		<div class="container">
+			<ol class="breadcrumb breadcrumb1 animated wow slideInLeft" data-wow-delay=".5s">
+				<li><a href="index.html"><span class="glyphicon glyphicon-home" aria-hidden="true"></span>Home</a></li>
+				<li class="active">Login Page</li>
+			</ol>
+		</div>
+	</div>
+<!-- //breadcrumbs -->
+<!-- login -->
+	<div class="login">
+		<div class="container">
+			<h2>Login Form</h2>
+		
+			<div class="login-form-grids animated wow slideInUp" data-wow-delay=".5s">
+				<form  method="POST">
+                    {% csrf_token %}
+                    {{form}}
+                    <button class="btn btn-primary"> Log in</button>
+				</form>
+			</div>
+			<h4>For New People</h4>
+			<p><a href="registered.html">Register Here</a> (Or) go back to <a href="index.html">Home<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></p>
+		</div>
+	</div>
+<!-- //login -->
+{% endif %}
 <!-- //footer -->
 <div class="footer">
     <div class="container">
