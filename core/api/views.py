@@ -245,8 +245,12 @@ class OrderDetailView(RetrieveAPIView):
 
     def get(self, *args, **kwargs):
         try:
+            orderid = kwargs.get(
+                        "orderid",
+                        None
+                        )
             address = Address.objects.filter(user = self.request.user)
-            order = Order.objects.get(user=self.request.user, ordered=False)
+            order = Order.objects.get(user=self.request.user, ordered=False,id = orderid)
             context = {
                 'order_placed': 1,
                 'object': order,
@@ -256,7 +260,38 @@ class OrderDetailView(RetrieveAPIView):
         except ObjectDoesNotExist:
             messages.warning(self.request, "You do not have an active order")
             print("hero")
+            return redirect("order-list")
+
+class OrderListView(RetrieveAPIView):
+    serializer_class = OrderSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, *args, **kwargs):
+        try:
+            qs = Order.objects.all()
+            my_order = qs.filter(user=self.request.user)
+            print(my_order)
+            if len(my_order):
+                context = {
+                    'order_list':1,
+                    'object': my_order,
+                }
+            else:
+                context = {
+                    'no_order':1,
+                    'order_list':1,
+                    'object': my_order
+                }
+            return render(self.request, 'core/checkout.html', context)
+        except ObjectDoesNotExist:
+            messages.warning(self.request, "You do not have an active order")
+            print("hero")
             return redirect("/")
+        except Exception as e:
+            print(str(e))
+            return redirect("/")
+    
+        
 
 
 class DispatchDetailView(RetrieveAPIView):
@@ -266,7 +301,7 @@ class DispatchDetailView(RetrieveAPIView):
     def get(self, *args, **kwargs):
         try:
             address = Address.objects.filter(user = self.request.user)
-            order = Order.objects.filter( ordered=True , dispatched = False )
+            order = Order.objects.filter( ordered=True)
             my_order =[]
             for check_order in order:
                 if check_order.get_total():
@@ -438,13 +473,15 @@ class CountryListView(APIView):
 class AddressListView(ListAPIView):
     permission_classes = (IsAuthenticated, )
     serializer_class = AddressSerializer
-
+    template_name = "core/checkout.html"
     def get_queryset(self):
         address_type = self.request.query_params.get('address_type', None)
         qs = Address.objects.all()
         if address_type is None:
             return qs
         return qs.filter(user=self.request.user, address_type=address_type)
+
+
 
 
 class AddressCreateView(CreateAPIView):
@@ -609,6 +646,38 @@ class GeneratePdf(View):
             response['Content-Disposition'] = content
             return response
         return HttpResponse("Not found") 
+
+
+class GenerateInvoicePdf(View):
+    def get(self, request, *args, **kwargs):
+        template = get_template('invoice.html')
+        orderid = kwargs.get(
+            "orderid",
+            None
+        )
+        order = Order.objects.get(id=orderid)
+        order.dispatched = True
+        order.save()
+        context = {
+            "customer_name": request.user.username,
+            "amount": order.get_total(),
+            "object" : order,
+        }
+        return render(request, "invoice.html",context)
+        html = template.render(context)
+        pdf = render_to_pdf('invoice.html', context)
+        if pdf:
+            response = HttpResponse(pdf, content_type='application/pdf')
+            filename = "Invoice_%s.pdf" %("12341231")
+            content = "inline; filename='%s'" %(filename)
+            download = request.GET.get("download")
+            if download:
+                content = "attachment; filename='%s'" %(filename)
+            response['Content-Disposition'] = content
+            return response
+        return HttpResponse("Not found") 
+
+
 
 
 def Categorypage(request, *args, **kwargs):

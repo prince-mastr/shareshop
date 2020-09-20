@@ -174,17 +174,22 @@ h2{
 				<ul>
 					<li> {{request.user.username}} </li>
 				</ul>
+				</div>
+				<div class="product_list_header">  
+                    {% if request.user.userprofile.owner %}
+                    <a class="w3view-cart" href = "{% url 'order-list' %}"><i class="fa fa-cart-arrow-down" aria-hidden="true"></i>My Orders</a>	
+					<a class="w3view-cart" href = "{% url 'dispatch-summary' %}"><i class="fa fa-share-alt" aria-hidden="true"></i></a>
+                    <a class="w3view-cart" href = "{% url 'share-summary' %}"><i class="fa fa-share-alt" aria-hidden="true"></i></a>
+                    {% endif %}
+                </div>
+                
 				{% else %}
 				<ul>
 					<li><a href="{% url  'accounts:sign_up' %}"> Create Account </a></li>
 					<li><a href="{% url  'accounts:log_in' %}">Login</a></li>
 				</ul>
+		</div>
 				{% endif %}
-			</div>
-			<div class="product_list_header">  
-				<a class="w3view-cart" href = "{% url 'order-summary' %}"><i class="fa fa-cart-arrow-down" aria-hidden="true"></i></a>	
-				<a class="w3view-cart" href = "{% url 'share-summary' %}"><i class="fa fa-share-alt" aria-hidden="true"></i></a>
-			</div>
 			<div class="clearfix"> </div>
 		</div>
 	</div>
@@ -288,6 +293,7 @@ h2{
     <div class="container">
         <div class="w3_footer_grids">
             <div class="col-md-3 w3_footer_grid">
+                
                 <h3>Contact</h3>
                 
                 <ul class="address">
@@ -296,25 +302,23 @@ h2{
                     <li><i class="glyphicon glyphicon-earphone" aria-hidden="true"></i>+1234 567 567</li>
                 </ul>
             </div>
-            <div class="col-md-3 w3_footer_grid">
-                <h3>Information</h3>
-                <ul class="info"> 
-                    <li><i class="fa fa-arrow-right" aria-hidden="true"></i><a href="about.html">About Us</a></li>
-                    <li><i class="fa fa-arrow-right" aria-hidden="true"></i><a href="contact.html">Contact Us</a></li>
-                    <li><i class="fa fa-arrow-right" aria-hidden="true"></i><a href="short-codes.html">Short Codes</a></li>
-                    <li><i class="fa fa-arrow-right" aria-hidden="true"></i><a href="faq.html">FAQ's</a></li>
-                    <li><i class="fa fa-arrow-right" aria-hidden="true"></i><a href="products.html">Special Products</a></li>
-                </ul>
-            </div>
+            {% if request.user.is_authenticated %}
             <div class="col-md-3 w3_footer_grid">
                 <h3>Category</h3>
-                <ul class="info"> 
-                    <li><i class="fa fa-arrow-right" aria-hidden="true"></i><a href="groceries.html">Groceries</a></li>
-                    <li><i class="fa fa-arrow-right" aria-hidden="true"></i><a href="household.html">Household</a></li>
-                    <li><i class="fa fa-arrow-right" aria-hidden="true"></i><a href="personalcare.html">Personal Care</a></li>
-                    <li><i class="fa fa-arrow-right" aria-hidden="true"></i><a href="packagedfoods.html">Packaged Foods</a></li>
-                    <li><i class="fa fa-arrow-right" aria-hidden="true"></i><a href="beverages.html">Beverages</a></li>
-                </ul>
+                <ul class="info">
+                    <!-- Mega Menu -->
+									{% for category in category_list %}
+									{% if category.parent %}
+									{% else %}
+									{% if category.children %}
+                                    <li><i class="fa fa-arrow-right" aria-hidden="true"></i><a href="{% url 'category-page' category.id %}">{{category.name}}</a></li>
+									{% else %}
+									<li><a href="{% url 'category-page' category.id %}">{{category.name}}</a></li>
+									{% endif %}
+									{% endif %}
+									{% endfor %}
+                   
+                    </ul>
             </div>
             <div class="col-md-3 w3_footer_grid">
                 <h3>Profile</h3>
@@ -327,6 +331,7 @@ h2{
                 
                 
             </div>
+            {% endif %}
             <div class="clearfix"> </div>
         </div>
     </div>
@@ -350,7 +355,7 @@ h2{
                 </ul>
             </div>
             <div class="payment-w3ls">	
-                <img src="images/card.png" alt=" " class="img-responsive">
+                <img src="{% static 'images/card.png' %}" alt=" " class="img-responsive">
             </div>
             <div class="clearfix"> </div>
         </div>
@@ -375,7 +380,11 @@ h2{
 			$().UItoTop({ easingType: 'easeOutQuart' });
 								
 			});
-	</script>
+    </script>
+    
+    <script>
+        var URL = "{% url 'quantityupdate' %}";
+    </script>
 <!-- //here ends scrolling icon -->
 <script src="js/minicart.min.js"></script>
 <script>

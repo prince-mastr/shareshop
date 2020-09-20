@@ -82,12 +82,15 @@
 												
 												<h4>{{object.discount_price}} <span>{{object.price}}</span></h4>
 											</div>
-												
+											{% if request.user.userprofile.owner %}
 											<a href='{{object.get_add_to_share_url}}'>Add to Share</a>	
+											{% endif %}
+											
 
 											<div class="snipcart-details top_brand_home_details">
 												<form action="{{object.get_add_to_cart_url}}" method="post">
 													<fieldset>
+														
 														<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 														<input type="hidden" name="slug" value="{{object.slug}}">
 														<input type="hidden" name="cmd" value="_cart">
@@ -99,7 +102,7 @@
 														<input type="hidden" name="currency_code" value="INR">
 														<input type="hidden" name="return" value=" ">
 														<input type="hidden" name="cancel_return" value=" ">
-														<input type="submit" name="submit" value="Add to cart" class="button">
+														<input type="submit" name="submit" id ="{{object.id}}" value="Add to cart" class="button" onclick="myFunction({{object.id}})">
 													</fieldset>
 												</form>
 											</div>
@@ -187,6 +190,12 @@
 			
 		});
 </script>	
+
+<script>
+	function myFunction(id ) {
+	  document.getElementById(id).value = "Go To Cart";
+	}
+	</script>
 
 <script>
 	var coll = document.getElementsByClassName("collapsible");

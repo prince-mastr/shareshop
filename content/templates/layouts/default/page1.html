@@ -47,17 +47,19 @@ Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, Sony
 				<ul>
 					<li> {{request.user.username}} </li>
 				</ul>
+				</div>
+				<div class="product_list_header">  
+					<a class="w3view-cart" href = "{% url 'order-summary' %}"><i class="fa fa-cart-arrow-down" aria-hidden="true"></i></a>	
+					<a class="w3view-cart" href = "{% url 'share-summary' %}"><i class="fa fa-share-alt" aria-hidden="true"></i></a>
+				</div>
 				{% else %}
 				<ul>
 					<li><a href="{% url  'accounts:sign_up' %}"> Create Account </a></li>
 					<li><a href="{% url  'accounts:log_in' %}">Login</a></li>
 				</ul>
+		</div>
 				{% endif %}
-			</div>
-			<div class="product_list_header">  
-				<a class="w3view-cart" href = "{% url 'order-summary' %}"><i class="fa fa-cart-arrow-down" aria-hidden="true"></i></a>	
-				<a class="w3view-cart" href = "{% url 'share-summary' %}"><i class="fa fa-share-alt" aria-hidden="true"></i></a>
-			</div>
+			
 			<div class="clearfix"> </div>
 		</div>
 	</div>

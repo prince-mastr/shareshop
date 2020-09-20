@@ -40,38 +40,14 @@
 						
 						<td class="invert" id="price{{item.item.id}}">{{ item.get_total }}</td>
 						<td class="invert">
-							<a href="{% url 'dispatch-order' item.id %}"> Dispatch </a>
+								{% if item.dispatched %}
+								<a href="{% url 'generate_invoice_pdf' item.id %}"> Dispatch Challan </a>
+								{% else %}
+								<a href="{% url 'dispatch-order' item.id %}"> Dispatch </a> 
+								{% endif %}
 						</td>
 					</tr>
 					{% endfor %}
-								<!--quantity-->
-									<script>
-									{% for item in object.items.all %}
-									var id{{item.item.id}} = document.getElementById("product{{item.item.id}}").innerHTML;
-									var price{{item.item.id}} = document.getElementById("price{{item.item.id}}").innerHTML;
-									$('.value-plus').on('click', function(){
-										var divUpd = $(this).parent().find('.value'), newVal = parseInt(divUpd.text(), 10)+1;
-										
-										divUpd.text(newVal);
-										document.getElementById("price{{item.item.id}}").innerHTML = newVal*price{{item.item.id}};
-
-										updatequantity(newVal,{{object.id}},id{{item.item.id}});
-									});
-									 
-									$('.value-minus').on('click', function(){
-										var divUpd = $(this).parent().find('.value'), newVal = parseInt(divUpd.text(), 10)-1;
-										if(newVal>=1) 
-										{
-											document.getElementById("price{{item.item.id}}").innerHTML = newVal*price{{item.item.id}};
-											divUpd.text(newVal);
-										}
-										updatequantity(newVal,{{object.id}},{{item.id}});
-										
-									});
-									
-									{% endfor %}
-									</script>
-								<!--quantity-->
 				</table>
 				{% elif dispatch_final %}
 				<table class="timetable_sub">
@@ -94,15 +70,10 @@
 						<td class="invert-image"><a href="single.html"><img src="images/3.png" alt=" " class="img-responsive" /></a></td>
 						<td class="invert" id = "product{{item.item.id}}">{{item.item.id}}</td>
 						<td class="invert">
-							 <div class="quantity"> 
-								<div class="quantity-select">                           
-									<div class="entry value-minus">&nbsp;</div>
-									<div class="entry value"><span>{{item.quantity}}</span></div>
-									<div class="entry value-plus active">&nbsp;</div>
+								<div class="quantity"> 
+									<input type="number" id="quantity{{item.id}}" name="quantity" min="1" value = {{item.quantity}}>
+									<button onclick="myFunction{{item.item.id}}()"></button>
 								</div>
-								 
-								
-							</div>
 						</td>
 						<td class="invert">{{ item.item.title }}</td>
 						
@@ -141,11 +112,9 @@
 									});
 									var id = "{{object.id}}";
 									var orderitem = '{{item.id}}';
-									var id = "{{object.id}}";
-									var orderitem = '{{item.id}}';
-
-									updatequantity(0,id,orderitem);
-									outofstock(id,orderitem)									
+									var itemid = '{{item.item.id}}'
+									updatequantity(0,orderitem,id);
+									outofstock(itemid)									
 									});	  
 									{% endfor %}
 									
@@ -157,36 +126,58 @@
 					{% endfor %}
 								<!--quantity-->
 									<script>
-									{% for item in object.items.all %}
-									var id{{item.item.id}} = document.getElementById("product{{item.item.id}}").innerHTML;
-									var price{{item.item.id}} = document.getElementById("price{{item.item.id}}").innerHTML;
-									$('.value-plus').on('click', function(){
-										var divUpd = $(this).parent().find('.value'), newVal = parseInt(divUpd.text(), 10)+1;
+									{{% for item in object.items.all %}
+									function myFunction{{item.item.id}}() {
 										
-										divUpd.text(newVal);
-										document.getElementById("price{{item.item.id}}").innerHTML = newVal*price{{item.item.id}};
-
-										updatequantity(newVal,{{object.id}},id{{item.item.id}});
-									});
-									 
-									$('.value-minus').on('click', function(){
-										var divUpd = $(this).parent().find('.value'), newVal = parseInt(divUpd.text(), 10)-1;
-										if(newVal>=1) 
-										{
-											document.getElementById("price{{item.item.id}}").innerHTML = newVal*price{{item.item.id}};
-											divUpd.text(newVal);
+										var quantity =document.getElementById("quantity{{item.id}}").value;
+										var id = "{{object.id}}";
+										var orderitem = '{{item.id}}';
+										updatequantity(quantity,orderitem,id);
 										}
-										updatequantity(newVal,{{object.id}},{{item.id}});
-										
-									});
 									
 									{% endfor %}
 									</script>
 								<!--quantity-->
 				</table>
 				<div class="checkout-right-basket">
-					<a href="{% url 'generate_invoice_pdf' object.id %}"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Dispatch Chalan</a>
+					<a href="{% url 'generate_invoice_pdf' object.id %}"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Invoice</a>
+					<a href="{% url 'generate_dispatch_pdf' object.id %}"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Dispatch Chalan</a>
 				</div>
+				{% elif order_list %}
+				{% if no_order %}
+				<h1>No Current Orders</h1>
+				{% else %}
+				<table class="timetable_sub">
+					<thead>
+						<tr>
+							<th>SL No.</th>	
+							<th>Order_id</th>
+							<th>Order_date</th>
+							<th>Order From</th>
+						
+							<th>Price</th>
+							<th>Status</th>
+						</tr>
+					</thead>
+					{% for item in object %}
+					<tr class="rem{{forloop.counter}}">
+						<td class="invert">{{forloop.counter}}</td>
+						<td class="invert" id = "product{{item.item.id}}">{{item.id}}</td>
+						<td class="invert">{{item.ordered_date}}</td>
+						<td class="invert">{{ item.user}}</td>
+						
+						<td class="invert" id="price{{item.item.id}}">{{ item.get_total }}</td>
+						<td class="invert">
+							{% if item.ordered %}
+							<a href="{% url 'generate_invoice_pdf' item.id %}"> Invoice </a>
+							{% else %}
+							<a href="{% url 'order-summary' item.id %}"> Order Now </a> 
+							{% endif %}
+						</td>
+					</tr>
+					{% endfor %}
+				</table>
+				{% endif %}
 				{% else %}
 				<table class="timetable_sub">
 					<thead>
@@ -209,11 +200,8 @@
 						<td class="invert" >{{ item.quantity }}</td>
 						<td class="invert">
 							 <div class="quantity"> 
-								<div class="quantity-select">                           
-									<div class="entry value-minus">&nbsp;</div>
-									<div class="entry value"><span>{{item.quantity}}</span></div>
-									<div class="entry value-plus active">&nbsp;</div>
-								</div>
+								<input type="number" id="quantity{{item.id}}" name="quantity" min="1" value = {{item.quantity}}>
+								<button onclick="myFunction{{item.item.id}}()"></button>
 							</div>
 						</td>
 						<td class="invert">{{ item.item.title }}</td>
@@ -233,7 +221,7 @@
 									});
 									var id = "{{object.id}}";
 									var orderitem = '{{item.id}}';
-									updatequantity(0,id,orderitem);
+									updatequantity(0,orderitem,id);
 									});	  
 									{% endfor %}
 									
@@ -245,27 +233,13 @@
 								<!--quantity-->
 									<script>
 									{% for item in object.items.all %}
-									var id{{item.item.id}} = document.getElementById("product{{item.item.id}}").innerHTML;
-									var price{{item.item.id}} = document.getElementById("price{{item.item.id}}").innerHTML;
-									$('.value-plus').on('click', function(){
-										var divUpd = $(this).parent().find('.value'), newVal = parseInt(divUpd.text(), 10)+1;
+									function myFunction{{item.item.id}}() {
 										
-										divUpd.text(newVal);
-										document.getElementById("price{{item.item.id}}").innerHTML = newVal*price{{item.item.id}};
-
-										updatequantity(newVal,{{object.id}},id{{item.item.id}});
-									});
-									 
-									$('.value-minus').on('click', function(){
-										var divUpd = $(this).parent().find('.value'), newVal = parseInt(divUpd.text(), 10)-1;
-										if(newVal>=1) 
-										{
-											document.getElementById("price{{item.item.id}}").innerHTML = newVal*price{{item.item.id}};
-											divUpd.text(newVal);
+										var quantity =document.getElementById("quantity{{item.id}}").value;
+										var id = "{{object.id}}";
+										var orderitem = '{{item.id}}';
+										updatequantity(quantity,orderitem,id);
 										}
-										updatequantity(newVal,{{object.id}},{{item.id}});
-										
-									});
 									
 									{% endfor %}
 									</script>
@@ -363,6 +337,31 @@
 			
 		});
 </script>	
+<script>
+        
+        function updatequantity(quantity,itemid,orderid){
+            var csrftoken = '{{ csrf_token }}';
+            var data = {
+                'quantity': quantity,
+                "csrfmiddlewaretoken": csrftoken ,
+                "item": itemid,
+				"id":orderid,
+            };
+            $.post(URL, data);
+        }
+
+		function outofstock(quantity,itemid,orderid){
+            var csrftoken = '{{ csrf_token }}';
+            var data = {
+                'quantity': quantity,
+                "csrfmiddlewaretoken": csrftoken ,
+                "item": itemid,
+				"id":orderid,
+            };
+            $.post(URL, data);
+        }
+</script>
+
 {% endblock %}
 <!-- //main slider-banner --> 
 

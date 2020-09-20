@@ -27,7 +27,9 @@ from core.api.views import (
     DispatchOrder,
     ProductStock,
     GeneratePdf,
-    Categorypage
+    Categorypage,
+    OrderListView,
+    GenerateInvoicePdf
 
 )
 
@@ -36,6 +38,7 @@ urlpatterns = [
     path('user-id/', UserIDView.as_view(), name='user-id'),
     path('countries/', CountryListView.as_view(), name='country-list'),
     path('addresses/', AddressListView.as_view(), name='address-list'),
+    path('order-list/', OrderListView.as_view(), name='order-list'),
     path('addresses/create/', AddressCreateView.as_view(), name='address-create'),
     path('addresses/<pk>/update/',
          AddressUpdateView.as_view(), name='address-update'),
@@ -49,7 +52,7 @@ urlpatterns = [
     path('addtoshare/<slug>/', add_to_share, name='add-to-share'),
     path('addtosharecategory/<int:categoryid>/', add_to_share_category ,name = "add_to_share_category" ),
 
-    path('order-summary/', OrderDetailView.as_view(), name='order-summary'),
+    path('order-summary/<int:orderid>/', OrderDetailView.as_view(), name='order-summary'),
     path('share-summary/', ShareDetailView.as_view(), name='share-summary'),
     path('dispatch-list/', DispatchDetailView.as_view(), name='dispatch-summary'),
     path('dispatch-summary/<pk>/', DispatchOrder, name="dispatch-order"),
@@ -64,7 +67,8 @@ urlpatterns = [
     path('update-cart/', QuantityUpdate, name="quantityupdate"),
     path('share-list-url/', Sharedlist, name="share_list_url"),
     path('share-list-url/<str:slug>', SharedlistDetailView.as_view(), name="share_list_url-detail"),
-    path('get-dispatch/<int:orderid>/',GeneratePdf.as_view(), name="generate_invoice_pdf"),
+    path('get-dispatch/<int:orderid>/',GeneratePdf.as_view(), name="generate_dispatch_pdf"),
+    path('get-invoice/<int:orderid>/',GenerateInvoicePdf.as_view(), name="generate_invoice_pdf"),
     path('category/<int:categoryid>/', Categorypage, name="category-page"),
 
 
