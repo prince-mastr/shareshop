@@ -710,4 +710,18 @@ def Categorypage(request, *args, **kwargs):
                     })
         else:
             return redirect('index')
+
+def Checkoutpage(request, *args, **kwargs):
+    if request.method == 'GET':
+        order_id = kwargs.get(
+            "orderid",
+            None
+        )
+        order = Order.objects.get(id = order_id)
+        if request.user.is_authenticated:
+            csrf_token = django.middleware.csrf.get_token(request) 
+            return render(request,"core/order_checkout.html",
+            {"csrf_token": csrf_token ,
+             "object" : order}
+             )
             

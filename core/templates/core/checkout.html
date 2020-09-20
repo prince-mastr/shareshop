@@ -91,6 +91,7 @@
 									});
 									var id = "{{object.id}}";
 									var orderitem = '{{item.id}}';
+
 									updatequantity(0,id,orderitem);
 									
 									});	  
@@ -128,8 +129,9 @@
 									<script>
 									{{% for item in object.items.all %}
 									function myFunction{{item.item.id}}() {
+										var quantity = document.getElementById("quantity{{item.id}}").value;
+										document.getElementById("price{{item.item.id}}").innerHTML = quantity*{{item.item.price}} ;
 										
-										var quantity =document.getElementById("quantity{{item.id}}").value;
 										var id = "{{object.id}}";
 										var orderitem = '{{item.id}}';
 										updatequantity(quantity,orderitem,id);
@@ -238,6 +240,7 @@
 										var quantity =document.getElementById("quantity{{item.id}}").value;
 										var id = "{{object.id}}";
 										var orderitem = '{{item.id}}';
+										document.getElementById("price{{item.item.id}}").innerHTML = quantity*{{item.item.price}};
 										updatequantity(quantity,orderitem,id);
 										}
 									
@@ -258,32 +261,18 @@
 						<li>Total <i>-</i> <span><strong>{{object.get_total}}</strong></span></li>
 					</ul>
 				</div>
-				<div class="checkout-right-basket">
-					<a href="single.html"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Continue Shopping</a>
-				</div>
-				<form action="{% url 'place-order-now' object.id %}" method="post">
-					<fieldset>
-						<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-						<input type="hidden" name="order" value="{{object.id}}">
-						<select class="js-example-basic-single" name="shipping_address" id="brand">
-							<option value="Z">Select a Billing address</option>
-							{% for address in address_list %}
-							<option value="{{ address.id}}">{{ address.street_address }}</option>
-							{% endfor %}
-							</select> <br>
-						<select class="js-example-basic-single" name="billing_address" id="brand">
-							<option value="Z">Select a Shipping Address</option>
-							{% for address in address_list %}
-							<option value="{{ address.id}}">{{ address.street_address }}</option>
-							{% endfor %}
-							</select>
-
-						<input type="submit" name="submit" value="Order_Now" class="button">
-					</fieldset>
-				</form>
-				<div class="clearfix"> </div>
 			</div>
 			{% endif %}
+			<div class="checkout-right">	
+				<div class="checkout-right-basket">
+					
+					<a href="single.html"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Continue Shopping</a>
+				</div>
+			</div>
+		</div>
+	</div>
+			<div class="clearfix"> </div>
+			</div>
 		</div>
 	</div>
 <!-- //checkout -->
