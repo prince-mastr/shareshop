@@ -556,11 +556,12 @@ def PlaceOrder(request,pk):
     if request.method =="POST" :
         if "order" in request.POST:
             order = Order.objects.get(id  = request.POST["order"])
-            billing_address_id = request.POST['shipping_address']
-            shipping_address_id = request.POST['billing_address']
+            billing_address_id = request.POST.get('billing_address')
+            shipping_address_id = request.POST.get('shipping_address')
+            print(order,billing_address_id, shipping_address_id)
             billing_address = Address.objects.get(id=billing_address_id)
             shipping_address = Address.objects.get(id=shipping_address_id)
-                
+            
             if not order.ordered:
                 for order_item in  order.items.all():
                     order_item.ordered = True
@@ -717,11 +718,13 @@ def Checkoutpage(request, *args, **kwargs):
             "orderid",
             None
         )
+        address = Address.objects.filter(user = request.user)
         order = Order.objects.get(id = order_id)
         if request.user.is_authenticated:
             csrf_token = django.middleware.csrf.get_token(request) 
             return render(request,"core/order_checkout.html",
             {"csrf_token": csrf_token ,
-             "object" : order}
-             )
+             "object" : order,
+             "address_list": address
+             })
             
