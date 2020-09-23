@@ -142,18 +142,15 @@ def add_to_cart(request, slug):
         if order.items.filter(item__slug=item.slug).exists():
             order_item.quantity =  order_item.quantity  + 1
             order_item.save()
-            messages.info(request, "This item quantity was updated.")
             return redirect(request.META['HTTP_REFERER'])
         else:
             order.items.add(order_item)
-            messages.info(request, "This item was added to your cart.")
             return redirect(request.META['HTTP_REFERER'])
     else:
         ordered_date = timezone.now()
         order = Order.objects.create(
             user=request.user, ordered_date=ordered_date)
         order.items.add(order_item)
-        messages.info(request, "This item was added to your cart.")
         return redirect(request.META['HTTP_REFERER'])
 
 
@@ -168,17 +165,22 @@ def add_to_share(request,slug):
         user=request.user,
         shared=False
     )
+    print(share_item, created)
     share_qs = Share.objects.filter(user=request.user, shared=False)
     if share_qs.exists():
-        messages.info(request, "This Quantity is Alredy Present.")
-        return redirect(request.META['HTTP_REFERER'])
+        share = share_qs[0]
+        # check if the order item is in the order
+        if share.items.filter(item__slug=item.slug).exists():
+            return redirect(request.META['HTTP_REFERER'])
+        else:
+            share.items.add(share_item)
+            return redirect(request.META['HTTP_REFERER'])
         
     else:
         shared_date = timezone.now()
         share = Share.objects.create(
             user=request.user, shared_date=shared_date)
         share.items.add(share_item)
-        messages.info(request, "This item was added to your Sharelist")
         return redirect(request.META['HTTP_REFERER'])
 
 def add_to_share_category(request,categoryid):
@@ -190,10 +192,7 @@ def add_to_share_category(request,categoryid):
         shared=False
         )
         share_qs = Share.objects.filter(user=request.user, shared=False)
-        if share_qs.exists():
-            messages.info(request, "This Quantity is Alredy Present.")
-            
-        else:
+        if not share_qs.exists():
             shared_date = timezone.now()
             share = Share.objects.create(
                 user=request.user, shared_date=shared_date)
@@ -561,6 +560,20 @@ def QuantityUpdate(request):
     else:
         return redirect("index") 
 
+
+def QuantityShareUpdate(request):
+    if request.method == 'POST':
+        if 'id' in request.POST:
+            print("cgvhbjnm")
+            found_item = SharedItem.objects.get(id = request.POST["item"])
+            found_order = Share.objects.get(id=request.POST["id"])
+            found_order.items.remove(found_item)
+            found_item.save()
+            found_order.save()
+        return redirect(request.META['HTTP_REFERER'])
+    else:
+        return redirect("index") 
+
 def Sharedlist(request):
     if request.method == 'POST':
         if "share" in request.POST:
@@ -597,7 +610,6 @@ def PlaceOrder(request,pk):
             order = Order.objects.get(id  = request.POST["order"])
             billing_address_id = request.POST.get('billing_address')
             shipping_address_id = request.POST.get('shipping_address')
-            print(order,billing_address_id, shipping_address_id)
             billing_address = Address.objects.get(id=billing_address_id)
             shipping_address = Address.objects.get(id=shipping_address_id)
             
@@ -610,7 +622,7 @@ def PlaceOrder(request,pk):
                     order_item.save()
                 order.ordered = True
                 order.save()
-                return render( request, 'core/share_now.html',{"share_link" : 1,"object":order})
+                return render( request, 'core/share_now.html',{"order_placed" : 1,"object":order})
             else:
                 return redirect('index')
 
@@ -752,20 +764,45 @@ def Categorypage(request, *args, **kwargs):
             return redirect('index')
 
 def Checkoutpage(request, *args, **kwargs):
-    if request.method == 'GET':
-        order_id = kwargs.get(
-            "orderid",
-            None
-        )
-        address = Address.objects.filter(user = request.user)
-        order = Order.objects.get(id = order_id)
-        if request.user.is_authenticated:
-            csrf_token = django.middleware.csrf.get_token(request) 
-            return render(request,"core/order_checkout.html",
-            {"csrf_token": csrf_token ,
-             "object" : order,
-             "address_list": address
-             })
+    try:
+        if request.method == 'GET':
+            order_id = kwargs.get(
+                "orderid",
+                None
+            )
+            address = Address.objects.filter(user = request.user)
+            order = Order.objects.get(id = order_id)
+            if request.user.is_authenticated:
+                csrf_token = django.middleware.csrf.get_token(request) 
+                return render(request,"core/order_checkout.html",
+                {"csrf_token": csrf_token ,
+                "object" : order,
+                "address_list": address
+                })
+    except Order.DoesNotExist:
+        return redirect('index')
+
+def shareoutpage(request, *args, **kwargs):
+    try:
+        if request.method == 'GET':
+            share_id = kwargs.get(
+                "shareid",
+                None
+            )
+            users = User.objects.all()
+            share = Share.objects.get(id = share_id)
+            if request.user.is_authenticated:
+                csrf_token = django.middleware.csrf.get_token(request) 
+                return render(request,"core/order_checkout.html",
+                {"csrf_token": csrf_token ,
+                "share_checkout":1,
+                "object" : share,
+                "user_list": users
+                })
+    except Order.DoesNotExist:
+        return redirect('index')
+
+
             
 def search(request):
     query = request.POST["search"]

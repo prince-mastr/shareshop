@@ -68,7 +68,7 @@ class CheckoutView(View):
 
             return render(self.request, "checkout.html", context)
         except ObjectDoesNotExist:
-            messages.info(self.request, "You do not have an active order")
+            #messages.info(self.request, "You do not have an active order")
             return redirect("core:checkout")
 
     def post(self, *args, **kwargs):
@@ -91,8 +91,7 @@ class CheckoutView(View):
                         order.shipping_address = shipping_address
                         order.save()
                     else:
-                        messages.info(
-                            self.request, "No default shipping address available")
+                        #messages.info(self.request, "No default shipping address available")
                         return redirect('core:checkout')
                 else:
                     print("User is entering a new shipping address")
@@ -124,9 +123,7 @@ class CheckoutView(View):
                             shipping_address.default = True
                             shipping_address.save()
 
-                    else:
-                        messages.info(
-                            self.request, "Please fill in the required shipping address fields")
+                    
 
                 use_default_billing = form.cleaned_data.get(
                     'use_default_billing')
@@ -154,8 +151,7 @@ class CheckoutView(View):
                         order.billing_address = billing_address
                         order.save()
                     else:
-                        messages.info(
-                            self.request, "No default billing address available")
+                        #messages.info(self.request, "No default billing address available")
                         return redirect('core:checkout')
                 else:
                     print("User is entering a new billing address")
@@ -187,9 +183,6 @@ class CheckoutView(View):
                             billing_address.default = True
                             billing_address.save()
 
-                    else:
-                        messages.info(
-                            self.request, "Please fill in the required billing address fields")
 
                 payment_option = form.cleaned_data.get('payment_option')
 
@@ -377,18 +370,18 @@ def add_to_cart(request,slug):
         if order.items.filter(item__slug=item.slug).exists():
             order_item.quantity += 1
             order_item.save()
-            messages.info(request, "This item quantity was updated.")
+            #messages.info(request, "This item quantity was updated.")
             return redirect("core:order-summary")
         else:
             order.items.add(order_item)
-            messages.info(request, "This item was added to your cart.")
+            #messages.info(request, "This item was added to your cart.")
             return redirect("core:order-summary")
     else:
         ordered_date = timezone.now()
         order = Order.objects.create(
             user=request.user, ordered_date=ordered_date)
         order.items.add(order_item)
-        messages.info(request, "This item was added to your cart.")
+        #messages.info(request, "This item was added to your cart.")
         return redirect("core:order-summary")
 
 
@@ -401,7 +394,7 @@ def add_to_share(request,slug):
     )
     share_qs = Share.objects.filter(user=request.user, shared=False)
     if share_qs.exists():
-        messages.info(request, "This Quantity is Alredy Present.")
+        #messages.info(request, "This Quantity is Alredy Present.")
         return redirect("share-summary")
         
     else:
@@ -409,7 +402,7 @@ def add_to_share(request,slug):
         share = Share.objects.create(
             user=request.user, shared_date=shared_date)
         share.items.add(order_item)
-        messages.info(request, "This item was added to your Sharelist")
+        #messages.info(request, "This item was added to your Sharelist")
         return redirect("share-summary")
 
 
@@ -431,13 +424,13 @@ def remove_from_cart(request, slug):
                 ordered=False
             )[0]
             order.items.remove(order_item)
-            messages.info(request, "This item was removed from your cart.")
+            #messages.info(request, "This item was removed from your cart.")
             return redirect("core:order-summary")
         else:
-            messages.info(request, "This item was not in your cart")
+            #messages.info(request, "This item was not in your cart")
             return redirect("core:product", slug=slug)
     else:
-        messages.info(request, "You do not have an active order")
+        #messages.info(request, "You do not have an active order")
         return redirect("core:product", slug=slug)
 
 
@@ -462,13 +455,13 @@ def remove_single_item_from_cart(request, slug):
                 order_item.save()
             else:
                 order.items.remove(order_item)
-            messages.info(request, "This item quantity was updated.")
+            #messages.info(request, "This item quantity was updated.")
             return redirect("core:order-summary")
         else:
-            messages.info(request, "This item was not in your cart")
+            #messages.info(request, "This item was not in your cart")
             return redirect("core:product", slug=slug)
     else:
-        messages.info(request, "You do not have an active order")
+        #messages.info(request, "You do not have an active order")
         return redirect("core:product", slug=slug)
 
 
@@ -477,7 +470,7 @@ def get_coupon(request, code):
         coupon = Coupon.objects.get(code=code)
         return coupon
     except ObjectDoesNotExist:
-        messages.info(request, "This coupon does not exist")
+        #messages.info(request, "This coupon does not exist")
         return redirect("core:checkout")
 
 
@@ -494,7 +487,7 @@ class AddCouponView(View):
                 messages.success(self.request, "Successfully added coupon")
                 return redirect("core:checkout")
             except ObjectDoesNotExist:
-                messages.info(self.request, "You do not have an active order")
+                #messages.info(self.request, "You do not have an active order")
                 return redirect("core:checkout")
 
 
@@ -525,9 +518,9 @@ class RequestRefundView(View):
                 refund.email = email
                 refund.save()
 
-                messages.info(self.request, "Your request was received.")
+                #messages.info(self.request, "Your request was received.")
                 return redirect("core:request-refund")
 
             except ObjectDoesNotExist:
-                messages.info(self.request, "This order does not exist.")
+                #messages.info(self.request, "This order does not exist.")
                 return redirect("core:request-refund")

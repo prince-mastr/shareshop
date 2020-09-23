@@ -2,9 +2,12 @@
 {% load static %}
 
 {% block content %}
-<div class="container">
+                <div class="container">
                 <div class="col my-4">
+                    <br>
                     <h2>Step 2 - Enter Address & Other Details:</h2>
+                    <br>
+                    {% if order_checkout %}
                     <form  method="post" action="{% url 'place-order-now' object.id %}">{% csrf_token %}
                         <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
                         <input type="hidden" name="order" value="{{object.id}}">
@@ -42,6 +45,31 @@
                         </div>
                         <button type ="submit" id="demo1" class="btn btn-primary"> Place Order</button>
                     </form>
+                    {% elif share_checkout %}
+                    <form  method="post" action="{% url 'share_list_url' %}">{% csrf_token %}
+                        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                        <input type="hidden" name="share" value="{{object.id}}">
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="inputname">Name</label>
+                                <input type="text" class="form-control" id="name" name="name" placeholder="Name" value="{{request.user}}">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="shipping_address">User :</label>
+                            <select class="js-example-basic-single" name="shared_user" id="brand">
+								<option value="Z">Select a User</option>
+								{% for user in user_list %}
+								<option value="{{ user.username}}">{{ user.username }}</option>
+								{% endfor %}
+								</select> <br>
+                        </div>
+                        
+                        <button type ="submit" id="demo1" class="btn btn-primary"> Share Now</button>
+                    </form>
+                    {% endif %}
+
                 </div>
             </div>
         </div>

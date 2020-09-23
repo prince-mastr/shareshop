@@ -11,7 +11,7 @@
 				<li class="active">Checkout Page</li>
 			</ol>
 		</div>
-	</div>
+	</div>3
 <!-- //breadcrumbs -->
 <!-- checkout -->
 	<div class="checkout">
@@ -183,6 +183,7 @@
 				{% if no_order %}
 				<h1>No Current Orders</h1>
 				{% else %}
+
 				<table class="timetable_sub">
 					<thead>
 						<tr>
@@ -215,15 +216,17 @@
 				</table>
 				{% endif %}
 				{% else %}
+				{% if object.items.all %}
 				<table class="timetable_sub">
 					<thead>
 						<tr>
 							<th>SL No.</th>	
 							<th>Product</th>
 							<th>Product_id</th>
+							<th>Product Name</th>
 							<th >Required</th>
 							<th>Quality</th>
-							<th>Product Name</th>
+							<th>Per Piece</th>
 							<th>Price</th>
 							<th>Remove</th>
 						</tr>
@@ -233,17 +236,16 @@
 						<td class="invert">{{forloop.counter}}</td>
 						<td class="invert-image"><a href="{{item.item.get_absolute_url}}"><img src="{{item.item.image.url}}" alt=" " class="img-responsive" /></a></td>
 						<td class="invert" id = "product{{item.item.id}}">{{item.item.id}}</td>
+						<td class="invert">{{ item.item.title }}</td>
 						<td class="invert" >{{ item.quantity }}</td>
 						<td class="invert">
 							 <div class="quantity"> 
-								<input type="number" id="quantity{{item.id}}" name="quantity" min="1" value = {{item.quantity}}>
+								<input type="number" style="width: 75px;" maxlength="6" id="quantity{{item.id}}" name="quantity" min="1" value = {{item.quantity}}>
 								<button onclick="myFunction{{item.item.id}}()"></button>
 							</div>
 						</td>
-						<td class="invert">{{ item.item.title }}</td>
-						
+						<td class="invert" id="price{{item.item.id}}">{{ item.item.discount_price }}</td>
 						<td class="invert" id="price{{item.item.id}}">{{ item.get_total_item_price }}</td>
-						
 						<td class="invert">
 							<div class="rem">
 								<div class="close{{forloop.counter}}"> </div>
@@ -282,7 +284,6 @@
 									</script>
 								<!--quantity-->
 				</table>
-				
 			</div>
 			<div class="checkout-left">	
 				<div class="checkout-left-basket">
@@ -296,18 +297,23 @@
 					</ul>
 				</div>
 			</div>
-			{% endif %}
 			<div class="checkout-right">	
 				<div class="checkout-right-basket">
 					{% if object %}
 					<a href="{% url 'product-list'  %}"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Continue Shopping</a>
-					{% else %}
 					<a href="{% url 'checkout_page' object.id %}"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Checkout Now</a>
+					{% else %}
 					<a href="{% url 'product-list'  %}"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Continue Shopping</a>
 					{% endif %}
 					
 				</div>
 			</div>
+			{% else %}
+				<h2> Please Add Some Items to Share List </h2>
+				<a href="{% url 'product-list'  %}"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Continue Shopping</a>
+				{% endif %}
+			{% endif %}
+			
 		</div>
 	</div>
 			<div class="clearfix"> </div>

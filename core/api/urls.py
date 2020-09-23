@@ -32,7 +32,9 @@ from core.api.views import (
     GenerateInvoicePdf,
     Checkoutpage,
     SharelistAPI,
-    search
+    search,
+    QuantityShareUpdate,
+    shareoutpage
 
 )
 
@@ -68,12 +70,14 @@ urlpatterns = [
     path('place_order/<pk>/', PlaceOrder, name="place-order-now"), 
     path('payments/', PaymentListView.as_view(), name='payment-list'),
     path('update-cart/', QuantityUpdate, name="quantityupdate"),
+    path('update-share-cart/', QuantityShareUpdate, name="quantityshareupdate"),
     path('share-list-url/', Sharedlist, name="share_list_url"),
     path('share-list-url/<str:slug>', SharedlistDetailView.as_view(), name="share_list_url-detail"),
     path('get-dispatch/<int:orderid>/',GeneratePdf.as_view(), name="generate_dispatch_pdf"),
     path('get-invoice/<int:orderid>/',GenerateInvoicePdf.as_view(), name="generate_invoice_pdf"),
     path('category/<int:categoryid>/', Categorypage, name="category-page"),
     path('checkout/<int:orderid>/', Checkoutpage, name="checkout_page"),
+    path('shareout/<int:shareid>/', shareoutpage, name="share_out_page"),
     path('search/', search, name="search" )
 
 
