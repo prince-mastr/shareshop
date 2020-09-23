@@ -17,10 +17,15 @@ def add_form_to_context(request):
 
 def present_order(request):
     try:
-        Present_order = Order.objects.get(user = request.user, ordered = False)
-        return {
-            'present_order': Present_order
-        }
+        if request.user.is_authenticated:
+            Present_order = Order.objects.get(user = request.user, ordered = False)
+            return {
+                'present_order': Present_order
+            }
+        else:
+            return {
+            'present_order': 0
+            }
     except Order.DoesNotExist:
         return {
             'present_order': 0

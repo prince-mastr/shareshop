@@ -336,10 +336,10 @@ h2{
             <div class="col-md-3 w3_footer_grid">
                 <h3>Profile</h3>
                 <ul class="info"> 
-                    <li><i class="fa fa-arrow-right" aria-hidden="true"></i><a href="products.html">Store</a></li>
-                    <li><i class="fa fa-arrow-right" aria-hidden="true"></i><a href="checkout.html">My Cart</a></li>
-                    <li><i class="fa fa-arrow-right" aria-hidden="true"></i><a href="login.html">Login</a></li>
-                    <li><i class="fa fa-arrow-right" aria-hidden="true"></i><a href="registered.html">Create Account</a></li>
+                    <li><i class="fa fa-arrow-right" aria-hidden="true"></i><a href="{% url 'product-list' %}">Store</a></li>
+                    {% if present_order %}
+                    <li><i class="fa fa-arrow-right" aria-hidden="true"></i><a href="{% url 'order-summary' present_order.id %}">My Cart</a></li>
+                   {% endif %}
                 </ul>
                 
                 
