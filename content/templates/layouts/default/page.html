@@ -159,6 +159,8 @@ h2{
         display: block;
         text-align: center;
     }
+
+    
 }
 </style>
 
@@ -172,14 +174,24 @@ h2{
 			<div class="agile-login">
 				{% if request.user.is_authenticated %}
 				<ul>
-					<li> {{request.user.username}} </li>
+                    <li> <a href="#" > <i class="fa fa-user" aria-hidden="true"></i> {{request.user.username}} </a></li>
+                    <li> <a href="{% url 'product-list' %}" > <i class="fa fa-product" aria-hidden="true"></i> Store </a></li>
 				</ul>
 				</div>
-				<div class="product_list_header">  
+				<div class="product_list_header" >  
                     {% if request.user.userprofile.owner %}
-                    <a class="w3view-cart" href = "{% url 'order-list' %}"><i class="fa fa-cart-arrow-down" aria-hidden="true"></i>My Orders</a>	
-					<a class="w3view-cart" href = "{% url 'dispatch-summary' %}"><i class="fa fa-share-alt" aria-hidden="true"></i></a>
-                    <a class="w3view-cart" href = "{% url 'share-summary' %}"><i class="fa fa-share-alt" aria-hidden="true"></i></a>
+                    {% if present_order %}
+                    <a  style="color:white" href = "{% url 'order-summary' present_order.id %}"><i class="fa fa-cart-arrow-down" aria-hidden="true"></i>My Cart</a>	
+                    {% endif %}
+                    <a style="color:white" href = "{% url 'share-summary' %}"><i class="fa fa-share-alt" aria-hidden="true"></i>My Share Cart</a>
+                    <a style="color:white" href = "{% url 'order-list' %}"><i class="fa fa-cart-arrow-down" aria-hidden="true"></i>My Orders<t></t></a>	
+					<a style="color:white" href = "{% url 'dispatch-summary' %}"><i class="fa fa-share-alt" aria-hidden="true"></i> Dispatch- List<t></t></a>
+                    <a style="color:white" href = "{% url 'share-list' %}"><i class="fa fa-share-alt" aria-hidden="true"></i> Share-list<t></t>  </a>
+                    {% else %}
+                    {% if present_order %}
+                    <a  style="color:white" href = "{% url 'order-summary' present_order.id %}"><i class="fa fa-cart-arrow-down" aria-hidden="true"></i>My Cart</a>	
+                    {% endif %}
+                    <a  href = "{% url 'order-list' %}"><i class="fa fa-cart-arrow-down" aria-hidden="true"></i>My Orders</a>	
                     {% endif %}
                 </div>
                 
@@ -206,8 +218,9 @@ h2{
 				<h1><a href="{% url 'index' %}">Surat Saree</a></h1>
 			</div>
 		<div class="w3l_search">
-			<form action="#" method="post">
-				<input type="search" name="Search" placeholder="Search for a Product..." required="">
+			<form action="{% url 'search' %}" method="post">
+                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                <input type="search" name="search" placeholder="Search for a Product..." required="">
 				<button type="submit" class="btn btn-default search" aria-label="Left Align">
 					<i class="fa fa-search" aria-hidden="true"> </i>
 				</button>

@@ -7,7 +7,7 @@
 	<div class="breadcrumbs">
 		<div class="container">
 			<ol class="breadcrumb breadcrumb1">
-				<li><a href="index.html"><span class="glyphicon glyphicon-home" aria-hidden="true"></span>Home</a></li>
+				<li><a href="{% url 'index' %}"><span class="glyphicon glyphicon-home" aria-hidden="true"></span>Home</a></li>
 				<li class="active">Checkout Page</li>
 			</ol>
 		</div>
@@ -67,7 +67,7 @@
 					{% for item in object.items.all %}
 					<tr class="rem{{forloop.counter}}">
 						<td class="invert">{{forloop.counter}}</td>
-						<td class="invert-image"><a href="single.html"><img src="images/3.png" alt=" " class="img-responsive" /></a></td>
+						<td class="invert-image"><a href="{{item.item.get_absolute_url}}"><img src="{{item.item.image.url}}" alt=" " class="img-responsive" /></a></td>
 						<td class="invert" id = "product{{item.item.id}}">{{item.item.id}}</td>
 						<td class="invert">
 								<div class="quantity"> 
@@ -145,6 +145,40 @@
 					<a href="{% url 'generate_invoice_pdf' object.id %}"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Invoice</a>
 					<a href="{% url 'generate_dispatch_pdf' object.id %}"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Dispatch Chalan</a>
 				</div>
+				{% elif share_list %}
+				<table class="timetable_sub">
+					<thead>
+						<tr>
+							<th>SL No.</th>	
+							<th>Share id </th>
+							<th>Share</th>
+							<th>Share_link</th>
+							<th>Shared_with</th>
+							<th>Shared_status</th>
+						</tr>
+					</thead>
+					{% for item in object %}
+					{% if item.url %}
+					<tr class="rem{{forloop.counter}}">
+						<td class="invert">{{forloop.counter}}</td>
+						<td class="invert">{{item.id}}</td>
+						<td class="invert">{{item.share}}</td>
+						<td class="invert"><a href="whatsapp://send?text={{ item.url}}" data-action="share/whatsapp/share"><i class="fa fa-whatsapp" aria-hidden="true"></i></a></td>
+						<td class="invert">{{ item.shared_user }}</td>
+						<td class="invert">
+							{% if item.share.shared %}
+							Shared 
+							{% else %}
+							
+							{% endif %}
+
+						</td>
+					</tr>
+					{% endif %}
+					
+					{% endfor %}
+
+				</table>
 				{% elif order_list %}
 				{% if no_order %}
 				<h1>No Current Orders</h1>
@@ -197,7 +231,7 @@
 					{% for item in object.items.all %}
 					<tr class="rem{{forloop.counter}}">
 						<td class="invert">{{forloop.counter}}</td>
-						<td class="invert-image"><a href="single.html"><img src="{{item.item.image.url}}" alt=" " class="img-responsive" /></a></td>
+						<td class="invert-image"><a href="{{item.item.get_absolute_url}}"><img src="{{item.item.image.url}}" alt=" " class="img-responsive" /></a></td>
 						<td class="invert" id = "product{{item.item.id}}">{{item.item.id}}</td>
 						<td class="invert" >{{ item.quantity }}</td>
 						<td class="invert">
@@ -265,8 +299,13 @@
 			{% endif %}
 			<div class="checkout-right">	
 				<div class="checkout-right-basket">
+					{% if object %}
+					<a href="{% url 'product-list'  %}"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Continue Shopping</a>
+					{% else %}
 					<a href="{% url 'checkout_page' object.id %}"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Checkout Now</a>
-					<a href="single.html"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Continue Shopping</a>
+					<a href="{% url 'product-list'  %}"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Continue Shopping</a>
+					{% endif %}
+					
 				</div>
 			</div>
 		</div>

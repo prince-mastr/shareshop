@@ -16,10 +16,10 @@
 	<div class="products">
 		<div class="container">
 			<div class="col-md-4 products-left">
-				<button type="button" class="collapsible">categories</button>
+				
 				<div class="categories">
 					<h2>Categories</h2>
-					
+					<button type="button" style="color: black;float: center;" class="collapsible" ><strong>Filter </strong></button>
 					<ul class="cate">
 						{% for category in category_list %}
 						{% if category.parent %}
@@ -32,7 +32,7 @@
 								{% if child.children %}
 								<ul>
 								{% for child_parent in child.children.all %}
-								<li><a href="{% url 'category-page' child.id %}"><i class="fa fa-arrow-right" aria-hidden="true"></i>{{child_parent.name}}</a></li>
+								<li><a href="{% url 'category-page' child_parent.id %}"><i class="fa fa-arrow-right" aria-hidden="true"></i>{{child_parent.name}}</a></li>
 								{% endfor %}
 								</ul>
 								{% endif %}
@@ -47,14 +47,7 @@
 			<div class="col-md-8 products-right">
 				<div class="products-right-grid">
 					<div class="products-right-grids">
-						<div class="sorting">
-							<select id="country" onchange="change_country(this.value)" class="frm-field required sect">
-								<option value="null"><i class="fa fa-arrow-right" aria-hidden="true"></i>Default sorting</option>
-								<option value="null"><i class="fa fa-arrow-right" aria-hidden="true"></i>Sort by popularity</option> 
-								<option value="null"><i class="fa fa-arrow-right" aria-hidden="true"></i>Sort by average rating</option>					
-								<option value="null"><i class="fa fa-arrow-right" aria-hidden="true"></i>Sort by price</option>								
-							</select>
-						</div>
+						
 						<div class="sorting-left">
 							{% if category %}
 							<a href="{% url 'add_to_share_category' category.id %}">Share all {{category.name}} Items</a>
@@ -63,6 +56,7 @@
 						<div class="clearfix"> </div>
 					</div>
 				</div>
+				{% if object_list %}
 				{% for object in object_list %} 
 				{% if forloop.counter|divisibleby:3 %}
 				<div class="agile_top_brands_grids">
@@ -117,25 +111,35 @@
 				</div>
 				{% endif %}
 				{% endfor %}
+				
+
 			
 				<nav class="numbering">
+				{% if users.has_other_pages %}
 					<ul class="pagination paging">
-						<li>
-							<a href="#" aria-label="Previous">
-								<span aria-hidden="true">&laquo;</span>
-							</a>
-						</li>
-						<li class="active"><a href="#">1<span class="sr-only">(current)</span></a></li>
-						<li><a href="#">2</a></li>
-						<li><a href="#">3</a></li>
-						<li><a href="#">4</a></li>
-						<li><a href="#">5</a></li>
-						<li>
-							<a href="#" aria-label="Next">
-							<span aria-hidden="true">&raquo;</span>
-							</a>
-						</li>
+						{% if users.has_previous %}
+						<li><a href="?page={{ users.previous_page_number }}">&laquo;</a></li>
+						{% else %}
+						<li class="disabled"><span>&laquo;</span></li>
+						{% endif %}
+						{% for i in users.paginator.page_range %}
+						{% if users.number == i %}
+							<li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+						{% else %}
+							<li><a href="?page={{ i }}">{{ i }}</a></li>
+						{% endif %}
+						{% endfor %}
+						{% if users.has_next %}
+						<li><a href="?page={{ users.next_page_number }}">&raquo;</a></li>
+						{% else %}
+						<li class="disabled"><span>&raquo;</span></li>
+						{% endif %}
 					</ul>
+					{% endif %}
+					{% else %}
+					<h3> NO Object Found </h3>
+					<a href="{% url 'product-list'  %}"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Continue Shopping</a>
+					{% endif %}
 				</nav>
 			</div>
 			<div class="clearfix"> </div>

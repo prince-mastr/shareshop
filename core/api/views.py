@@ -36,6 +36,10 @@ from core.api.utils import render_to_pdf #created in step 4
 
 import datetime
 
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
+
+
 #stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
@@ -48,24 +52,40 @@ class ItemListView(ListAPIView):
     permission_classes = (IsAuthenticated, )
     serializer_class = ItemSerializer
     def get(self, request, *args, **kwargs):
-        print(request.user.userprofile.owner)
         if request.user.userprofile.owner:
-            print("lznbkn;")
             csrf_token = django.middleware.csrf.get_token(request) 
             queryset = Item.objects.filter(stock = True)
-            return render(request,"core/products.html",{"object_list":queryset,
+            page = request.GET.get('page', 1)
+            paginator = Paginator(queryset, 10)
+            try:
+                users = paginator.page(page)
+            except PageNotAnInteger:
+                users = paginator.page(1)
+            except EmptyPage:
+                users = paginator.page(paginator.num_pages)
+
+            return render(request,"core/products.html",{"object_list":users,
             "csrf_token": csrf_token})
         else:
-            print("zmnv ,b")
             csrf_token = django.middleware.csrf.get_token(request)
             queryset = Sharelist.objects.filter(shared_user = request.user,share__shared = True)
-            items = []
             for my_sharelist in queryset:
                 print()
                 for my_share_item in my_sharelist.share.items.all():
                     if my_share_item.item.stock:
                         items.append(my_share_item.item)
-            return render(request,"core/products.html",{"object_list":set(items),
+
+            page = request.GET.get('page', 1)
+            paginator = Paginator(set(items), 10)
+            try:
+                users = paginator.page(page)
+            except PageNotAnInteger:
+                users = paginator.page(1)
+            except EmptyPage:
+                users = paginator.page(paginator.num_pages)
+
+
+            return render(request,"core/products.html",{"object_list":users,
             "csrf_token": csrf_token})
             
 
@@ -270,7 +290,6 @@ class OrderListView(RetrieveAPIView):
         try:
             qs = Order.objects.all()
             my_order = qs.filter(user=self.request.user)
-            print(my_order)
             if len(my_order):
                 context = {
                     'order_list':1,
@@ -325,9 +344,26 @@ class DispatchDetailView(RetrieveAPIView):
             return render(self.request, 'core/checkout.html', context)
         except ObjectDoesNotExist:
             messages.warning(self.request, "You do not have an active order")
-            print("hero")
             return redirect("/")
 
+
+
+class SharelistAPI(RetrieveAPIView):
+    serializer_class = ShareSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, *args, **kwargs):
+        try:
+            share = Sharelist.objects.filter(created_by=self.request.user)
+            print(share)
+            context = {
+                'share_list':1,
+                'object': share
+            }
+            return render(self.request, 'core/checkout.html', context)
+        except ObjectDoesNotExist:
+            messages.warning(self.request, "You do not have an active order")
+            return redirect("/")
 
 
 
@@ -338,7 +374,6 @@ class ShareDetailView(RetrieveAPIView):
     def get(self, *args, **kwargs):
         try:
             share = Share.objects.get(user=self.request.user, shared=False)
-            print(list(share.items.all()))
             Users = User.objects.all()
             context = {
                 'object': share,
@@ -530,25 +565,29 @@ def Sharedlist(request):
     if request.method == 'POST':
         if "share" in request.POST:
             share = Share.objects.get(id = request.POST["share"])
-            if share.shared:
-                Share_list = Sharelist.objects.get(share = share)
-                return render( request, 'core/share_now.html',{"url_for_share":Share_list.url})
-            else:
-                share.shared = True
-                share.save()
-                user = User.objects.get(username = request.POST["shared_user"])
-                slug = str(uuid4())[:8]
-                Share_list = Sharelist.objects.create(
-                    share = share,
-                    shared_user = user,
-                    slug = slug,
-                    created_by = request.user
-                )
-                Share_list.save()
-                Share_list.get_absolute_url()
-                Share_list.url = request.build_absolute_uri(Share_list.get_absolute_url())
-                Share_list.save()
-                return render( request, 'core/share_now.html',{"url_for_share":Share_list.url})
+            try:
+                if share.shared:
+                    Share_list = Sharelist.objects.get(share = share)
+                    return render( request, 'core/share_now.html',{"url_for_share":Share_list.url})
+                else:
+                    share.shared = True
+                    share.save()
+                    user = User.objects.get(username = request.POST["shared_user"])
+                    slug = str(uuid4())[:8]
+                    Share_list = Sharelist.objects.create(
+                        share = share,
+                        shared_user = user,
+                        slug = slug,
+                        created_by = request.user
+                    )
+                    Share_list.save()
+                    Share_list.get_absolute_url()
+                    Share_list.url = request.build_absolute_uri(Share_list.get_absolute_url())
+                    Share_list.save()
+                    return render( request, 'core/share_now.html',{"url_for_share":Share_list.url})
+            except:
+                pass
+            
         else:
             return redirect('home')
 
@@ -728,3 +767,43 @@ def Checkoutpage(request, *args, **kwargs):
              "address_list": address
              })
             
+def search(request):
+    query = request.POST["search"]
+    query_list = query.split()
+    search_list = []
+    csrf_token = django.middleware.csrf.get_token(request)
+    if request.user.userprofile.owner:
+        Item_qs = Item.objects.all()
+    else:
+        queryset = Sharelist.objects.filter(shared_user = request.user,share__shared = True)
+        for my_sharelist in queryset:
+            for my_share_item in my_sharelist.share.items.all():
+                if my_share_item.item.stock:
+                    search_list.append(my_share_item.item)
+
+        Item_qs = set(search_list)
+
+
+    try:
+        for q in query_list:
+            search_list = search_list + list(Item_qs.filter(
+                Q(title__icontains=q)))
+        for q in query_list:
+            search_list = search_list + list(Item.objects.filter(
+                Q(description__icontains=q)))
+
+        if len(search_list):
+            page = request.GET.get('page', 1)
+            paginator = Paginator(search_list, 10)
+            try:
+                users = paginator.page(page)
+            except PageNotAnInteger:
+                users = paginator.page(1)
+            except EmptyPage:
+                users = paginator.page(paginator.num_pages)
+            return render(request,"core/products.html",{"object_list":users, "csrf_token": csrf_token})
+        users = "No Object Found"
+        return render(request,"core/products.html",{"object_list":0,"No_search_found":1,"csrf_token": csrf_token})
+    except Exception as e:
+        print(str(e))
+        pass

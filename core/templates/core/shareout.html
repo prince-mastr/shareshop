@@ -33,7 +33,7 @@
 					{% for item in object.items.all %}
 					<tr class="rem{{forloop.counter}}">
 						<td class="invert">{{forloop.counter}}</td>
-						<td class="invert-image"><a href="single.html"><img src="images/3.png" alt=" " class="img-responsive" /></a></td>
+						<td class="invert-image"><a href="{{item.item.get_absolute_url}}"><img src="{{item.item.image.url}}" alt=" " class="img-responsive" /></a></td>
 						<td class="invert">
 							 <div class="quantity"> 
 								 
