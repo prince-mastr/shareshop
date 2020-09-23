@@ -198,11 +198,10 @@ class CheckoutView(View):
                 elif payment_option == 'P':
                     return redirect('core:payment', payment_option='paypal')
                 else:
-                    messages.warning(
-                        self.request, "Invalid payment option selected")
+                    #messages.warning(self.request, "Invalid payment option selected")
                     return redirect('core:checkout')
         except ObjectDoesNotExist:
-            messages.warning(self.request, "You do not have an active order")
+            #messages.warning(self.request, "You do not have an active order")
             return redirect("core:order-summary")
 
 
@@ -230,8 +229,7 @@ class PaymentView(View):
                     })
             return render(self.request, "payment.html", context)
         else:
-            messages.warning(
-                self.request, "You have not added a billing address")
+            #messages.warning(self.request, "You have not added a billing address")
             return redirect("core:checkout")
 
     def post(self, *args, **kwargs):
@@ -302,44 +300,42 @@ class PaymentView(View):
             except stripe.error.CardError as e:
                 body = e.json_body
                 err = body.get('error', {})
-                messages.warning(self.request, f"{err.get('message')}")
+                #messages.warning(self.request, f"{err.get('message')}")
                 return redirect("/")
 
             except stripe.error.RateLimitError as e:
                 # Too many requests made to the API too quickly
-                messages.warning(self.request, "Rate limit error")
+                #messages.warning(self.request, "Rate limit error")
                 return redirect("/")
 
             except stripe.error.InvalidRequestError as e:
                 # Invalid parameters were supplied to Stripe's API
-                messages.warning(self.request, "Invalid parameters")
+                #messages.warning(self.request, "Invalid parameters")
                 return redirect("/")
 
             except stripe.error.AuthenticationError as e:
                 # Authentication with Stripe's API failed
                 # (maybe you changed API keys recently)
-                messages.warning(self.request, "Not authenticated")
+                #messages.warning(self.request, "Not authenticated")
                 return redirect("/")
 
             except stripe.error.APIConnectionError as e:
                 # Network communication with Stripe failed
-                messages.warning(self.request, "Network error")
+                #messages.warning(self.request, "Network error")
                 return redirect("/")
 
             except stripe.error.StripeError as e:
                 # Display a very generic error to the user, and maybe send
                 # yourself an email
-                messages.warning(
-                    self.request, "Something went wrong. You were not charged. Please try again.")
+                #messages.warning(self.request, "Something went wrong. You were not charged. Please try again.")
                 return redirect("/")
 
             except Exception as e:
                 # send an email to ourselves
-                messages.warning(
-                    self.request, "A serious error occurred. We have been notifed.")
+                #messages.warning(self.request, "A serious error occurred. We have been notifed.")
                 return redirect("/")
 
-        messages.warning(self.request, "Invalid data received")
+        #messages.warning(self.request, "Invalid data received")
         return redirect("/payment/stripe/")
 
 
@@ -357,7 +353,7 @@ class OrderSummaryView(LoginRequiredMixin, View):
             }
             return render(self.request, 'core/checkout.html', context)
         except ObjectDoesNotExist:
-            messages.warning(self.request, "You do not have an active order")
+            #messages.warning(self.request, "You do not have an active order")
             return redirect("/")
 
 

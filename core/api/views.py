@@ -278,7 +278,7 @@ class OrderDetailView(RetrieveAPIView):
             }
             return render(self.request, 'core/checkout.html', context)
         except ObjectDoesNotExist:
-            messages.warning(self.request, "You do not have an active order")
+            #messages.warning(self.request, "You do not have an active order")
             print("hero")
             return redirect("order-list")
 
@@ -303,7 +303,7 @@ class OrderListView(RetrieveAPIView):
                 }
             return render(self.request, 'core/checkout.html', context)
         except ObjectDoesNotExist:
-            messages.warning(self.request, "You do not have an active order")
+            #messages.warning(self.request, "You do not have an active order")
             print("hero")
             return redirect("/")
         except Exception as e:
@@ -343,7 +343,7 @@ class DispatchDetailView(RetrieveAPIView):
 
             return render(self.request, 'core/checkout.html', context)
         except ObjectDoesNotExist:
-            messages.warning(self.request, "You do not have an active order")
+            #messages.warning(self.request, "You do not have an active order")
             return redirect("/")
 
 
@@ -362,7 +362,7 @@ class SharelistAPI(RetrieveAPIView):
             }
             return render(self.request, 'core/checkout.html', context)
         except ObjectDoesNotExist:
-            messages.warning(self.request, "You do not have an active order")
+            #messages.warning(self.request, "You do not have an active order")
             return redirect("/")
 
 
@@ -381,7 +381,7 @@ class ShareDetailView(RetrieveAPIView):
             }
             return render(self.request, 'core/shareout.html', context)
         except ObjectDoesNotExist:
-            messages.warning(self.request, "You do not have an active order")
+            #messages.warning(self.request, "You do not have an active order")
             return redirect("/")
 
 
@@ -458,7 +458,7 @@ class PaymentView(APIView):
 
         except stripe.error.RateLimitError as e:
             # Too many requests made to the API too quickly
-            messages.warning(self.request, "Rate limit error")
+            #messages.warning(self.request, "Rate limit error")
             return Response({"message": "Rate limit error"}, status=HTTP_400_BAD_REQUEST)
 
         except stripe.error.InvalidRequestError as e:
@@ -652,7 +652,7 @@ class SharedlistDetailView(RetrieveAPIView):
             }
             return render(self.request, 'core/checkout.html', context)
         except ObjectDoesNotExist:
-            messages.warning(self.request, "You do not have an active order")
+            #messages.warning(self.request, "You do not have an active order")
             return redirect("/")
 
 
