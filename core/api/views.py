@@ -69,24 +69,29 @@ class ItemListView(ListAPIView):
         else:
             csrf_token = django.middleware.csrf.get_token(request)
             queryset = Sharelist.objects.filter(shared_user = request.user,share__shared = True)
+            items =[]
             for my_sharelist in queryset:
                 print()
                 for my_share_item in my_sharelist.share.items.all():
                     if my_share_item.item.stock:
                         items.append(my_share_item.item)
+            if len(items):
+                page = request.GET.get('page', 1)
+                paginator = Paginator(list(set(items)), 10)
+                try:
+                    users = paginator.page(page)
+                except PageNotAnInteger:
+                    users = paginator.page(1)
+                except EmptyPage:
+                    users = paginator.page(paginator.num_pages)
 
-            page = request.GET.get('page', 1)
-            paginator = Paginator(set(items), 10)
-            try:
-                users = paginator.page(page)
-            except PageNotAnInteger:
-                users = paginator.page(1)
-            except EmptyPage:
-                users = paginator.page(paginator.num_pages)
 
-
-            return render(request,"core/products.html",{"object_list":users,
-            "csrf_token": csrf_token})
+                return render(request,"core/products.html",{"object_list":users,
+                "csrf_token": csrf_token})
+            else:
+                users=[]
+                return render(request,"core/products.html",{"object_list":users,
+                "csrf_token": csrf_token})
             
 
 
@@ -812,35 +817,47 @@ def search(request):
     if request.user.userprofile.owner:
         Item_qs = Item.objects.all()
     else:
-        queryset = Sharelist.objects.filter(shared_user = request.user,share__shared = True)
-        for my_sharelist in queryset:
-            for my_share_item in my_sharelist.share.items.all():
-                if my_share_item.item.stock:
-                    search_list.append(my_share_item.item)
-
-        Item_qs = set(search_list)
-
-
+        queryset = Sharelist.objects.filter(shared_user = request.user,share__shared = True,share__items__item__stock= True)
+        Item_qs = queryset
     try:
         for q in query_list:
             search_list = search_list + list(Item_qs.filter(
-                Q(title__icontains=q)))
+                Q(share__items__item__title__icontains=q)))
         for q in query_list:
-            search_list = search_list + list(Item.objects.filter(
-                Q(description__icontains=q)))
+            search_list = search_list + list(Item_qs.filter(
+                Q(share__items__item__description__icontains=q)))
+        
+        if request.user.userprofile.owner:
+            if len(search_list):
+                page = request.GET.get('page', 1)
+                paginator = Paginator(list(set(search_list)), 10)
+                try:
+                    users = paginator.page(page)
+                except PageNotAnInteger:
+                    users = paginator.page(1)
+                except EmptyPage:
+                    users = paginator.page(paginator.num_pages)
+                return render(request,"core/products.html",{"object_list":users, "csrf_token": csrf_token})
+            return render(request,"core/products.html",{"object_list":0,"No_search_found":1,"csrf_token": csrf_token})
+        else:
+            if len(search_list):
+                items=[]
+                for my_sharelist in search_list:
+                    for my_share_item in my_sharelist.share.items.all():
+                        if my_share_item.item.stock:
+                            items.append(my_share_item.item)
+                page = request.GET.get('page', 1)
+                paginator = Paginator(list(set(items)), 10)
+                try:
+                    users = paginator.page(page)
+                except PageNotAnInteger:
+                    users = paginator.page(1)
+                except EmptyPage:
+                    users = paginator.page(paginator.num_pages)
+                return render(request,"core/products.html",{"object_list":users, "csrf_token": csrf_token})
+            return render(request,"core/products.html",{"object_list":0,"No_search_found":1,"csrf_token": csrf_token})
+                
 
-        if len(search_list):
-            page = request.GET.get('page', 1)
-            paginator = Paginator(search_list, 10)
-            try:
-                users = paginator.page(page)
-            except PageNotAnInteger:
-                users = paginator.page(1)
-            except EmptyPage:
-                users = paginator.page(paginator.num_pages)
-            return render(request,"core/products.html",{"object_list":users, "csrf_token": csrf_token})
-        users = "No Object Found"
-        return render(request,"core/products.html",{"object_list":0,"No_search_found":1,"csrf_token": csrf_token})
     except Exception as e:
         print(str(e))
         pass

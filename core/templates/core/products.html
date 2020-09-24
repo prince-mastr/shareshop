@@ -49,8 +49,11 @@
 					<div class="products-right-grids">
 						
 						<div class="sorting-left">
+							{% if request.user.userprofile.owner %}
 							{% if category %}
+							
 							<a href="{% url 'add_to_share_category' category.id %}">Share all {{category.name}} Items</a>
+							{% endif %}
 							{% endif %}
 						</div>
 						<div class="clearfix"> </div>

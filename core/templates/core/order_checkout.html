@@ -55,15 +55,23 @@
                                 <input type="text" class="form-control" id="name" name="name" placeholder="Name" value="{{request.user}}">
                             </div>
                         </div>
-
-                        <div class="form-group">
-                            <label for="shipping_address">User :</label>
+                        <br>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                            <label  for="shipping_address">User :</label>
                             <select class="js-example-basic-single" name="shared_user" id="brand">
 								<option value="Z">Select a User</option>
 								{% for user in user_list %}
 								<option value="{{ user.username}}">{{ user.username }}</option>
 								{% endfor %}
-								</select> <br>
+                                </select> <br>
+                        </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="">Valid Input Time</label>
+                                <input type="datetime-local" class="form-control">
+                            </div>
                         </div>
                         
                         <button type ="submit" id="demo1" class="btn btn-primary"> Share Now</button>
@@ -74,11 +82,10 @@
             </div>
         </div>
         </section>
-        <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js"></script>
-        <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/wow/1.1.2/wow.js"></script>
+        
+       
+       
         <script src="https://notouchhandsanatizer.herokuapp.com/static/js/scripts.js"></script>
+        
         
 {% endblock %}
