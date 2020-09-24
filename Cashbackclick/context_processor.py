@@ -50,6 +50,10 @@ def check_user(request):
                 return {
                         'user_valid': 1
                     }
+        else:
+            return {
+                    'user_valid': 0
+                }
     except:
         pass
 
