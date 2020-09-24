@@ -224,7 +224,7 @@ h2{
 				<ul class="phone_email">
                     <li><i class="fa fa-phone" aria-hidden="true"></i>Order online or call us : (+0123) 234 567</li>
                     <br>
-                    <strong><li><i class="fa fa-phone" aria-hidden="true"></i>GST NO 1234567890</li> </strong>
+                    <strong><li><i class="fa fa-university" aria-hidden="true"></i>GST NO 1234567890</li> </strong>
 					
 				</ul>
 			</div>
@@ -302,10 +302,12 @@ h2{
 
 
 {% if request.user.is_authenticated %}
-
+{% if user_valid %}
     {% block content %}
         No content.
     {% endblock %}
+{% else %}
+{% endif %}
 {% else %}
 <!-- login -->
 <div class="login">

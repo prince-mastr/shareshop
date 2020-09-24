@@ -81,6 +81,7 @@ TEMPLATES = [
                 'Cashbackclick.context_processor.add_variable_to_context',
                 'Cashbackclick.context_processor.add_form_to_context',
                 'Cashbackclick.context_processor.present_order',
+                'Cashbackclick.context_processor.check_user',
             ],
         },
     },

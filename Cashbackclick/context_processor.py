@@ -1,6 +1,7 @@
-from core.models import Category ,Order
+from core.models import Category ,Order , Share , Sharelist
 from accounts.forms import SignInViaUsernameForm
 import django
+import datetime
 
 def add_variable_to_context(request):
     csrf_token = django.middleware.csrf.get_token(request) 
@@ -30,3 +31,28 @@ def present_order(request):
         return {
             'present_order': 0
         }
+
+def check_user(request):
+    try:
+        if request.user.is_authenticated:
+            if not request.user.userprofile.owner:
+                my_share_lists = Sharelist.objects.filter(shared_user = request.user)
+                for myshare in my_share_lists:
+                    if myshare.share.end_date >= datetime.datetime.now():
+                        return {
+                            'user_valid': 1
+                            }
+                else:
+                    return {
+                            'user_valid': 0
+                        }
+            else:
+                return {
+                        'user_valid': 1
+                    }
+    except:
+        pass
+
+
+
+

@@ -589,6 +589,7 @@ def Sharedlist(request):
                     return render( request, 'core/share_now.html',{"url_for_share":Share_list.url})
                 else:
                     share.shared = True
+                    share.end_date = request.POST['enddate']
                     share.save()
                     user = User.objects.get(username = request.POST["shared_user"])
                     slug = str(uuid4())[:8]
@@ -755,10 +756,10 @@ def Categorypage(request, *args, **kwargs):
                 queryset = Sharelist.objects.filter(shared_user = request.user,share__shared = True ,)
                 items = []
                 for my_sharelist in queryset:
-                    print()
-                    for my_share_item in my_sharelist.share.items.all():
-                        if my_share_item.item.stock and my_share_item.item.category.id == category_id :
-                            items.append(my_share_item.item)
+                    if my_sharelist.share.end_date >= datetime.datetime.now():
+                        for my_share_item in my_sharelist.share.items.all():
+                            if my_share_item.item.stock and my_share_item.item.category.id == category_id :
+                                items.append(my_share_item.item)
                 return render(request,"core/products.html",
                     {
                         "object_list":set(items),
