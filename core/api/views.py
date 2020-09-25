@@ -38,6 +38,7 @@ import datetime
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
+import pytz
 
 
 #stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -755,10 +756,12 @@ def Categorypage(request, *args, **kwargs):
                 csrf_token = django.middleware.csrf.get_token(request)
                 queryset = Sharelist.objects.filter(shared_user = request.user,share__shared = True ,)
                 items = []
+                date_today = datetime.date.today()
                 for my_sharelist in queryset:
-                    if my_sharelist.share.end_date >= datetime.datetime.now():
+                    if my_sharelist.share.end_date >= datetime.datetime(year= int(date_today.year), month = int(date_today.month) , day = int(date_today.day) , tzinfo=pytz.UTC):
                         for my_share_item in my_sharelist.share.items.all():
                             if my_share_item.item.stock and my_share_item.item.category.id == category_id :
+                                print(my_share_item.item)
                                 items.append(my_share_item.item)
                 return render(request,"core/products.html",
                     {

@@ -1,7 +1,8 @@
 from core.models import Category ,Order , Share , Sharelist
 from accounts.forms import SignInViaUsernameForm
 import django
-import datetime
+import datetime ,datetime
+import pytz
 
 def add_variable_to_context(request):
     csrf_token = django.middleware.csrf.get_token(request) 
@@ -36,26 +37,35 @@ def check_user(request):
     try:
         if request.user.is_authenticated:
             if not request.user.userprofile.owner:
+                users = 1
+                count =0
+                date_today = datetime.date.today()
                 my_share_lists = Sharelist.objects.filter(shared_user = request.user)
                 for myshare in my_share_lists:
-                    if myshare.share.end_date >= datetime.datetime.now():
-                        return {
-                            'user_valid': 1
-                            }
+                    if myshare.share.end_date < datetime.datetime(year= int(date_today.year), month = int(date_today.month) , day = int(date_today.day) , tzinfo=pytz.UTC):
+                        count = count +1
+                if count == len(my_share_lists):
+                    users = 0
                 else:
-                    return {
-                            'user_valid': 0
-                        }
+                    users =1
             else:
-                return {
-                        'user_valid': 1
-                    }
+                users =1
         else:
-            return {
-                    'user_valid': 0
-                }
+            users =0
+
+        return {
+            'user_valid': users
+        }
+            
+    except Sharelist.DoesNotExist:
+        return {
+            'user_valid': 0
+        }
     except:
-        pass
+        return {
+            'user_valid': 0
+        }
+
 
 
 

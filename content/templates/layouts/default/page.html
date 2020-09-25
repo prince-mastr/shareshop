@@ -302,11 +302,20 @@ h2{
 
 
 {% if request.user.is_authenticated %}
+{{user_valid}}
 {% if user_valid %}
     {% block content %}
         No content.
     {% endblock %}
 {% else %}
+<div class="products">
+    <div class="container">
+        <div class="col-md-4 products-left">
+            NO Products Has Been Shared For You
+    </div>
+    </div>
+    </div>
+
 {% endif %}
 {% else %}
 <!-- login -->
