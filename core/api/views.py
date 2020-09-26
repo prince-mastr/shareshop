@@ -35,7 +35,7 @@ from django.views.generic import View
 from core.api.utils import render_to_pdf #created in step 4
 
 import datetime
-
+from core.forms import AddressForm
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 import pytz
@@ -527,7 +527,9 @@ class AddressListView(ListAPIView):
 class AddressCreateView(CreateAPIView):
     permission_classes = (IsAuthenticated, )
     serializer_class = AddressSerializer
-    queryset = Address.objects.all()
+    template_name = "core/beverages.html"
+    def get_queryset(self):
+        queryset = Address.objects.all()
 
 
 class AddressUpdateView(UpdateAPIView):
@@ -785,6 +787,7 @@ def Checkoutpage(request, *args, **kwargs):
                 csrf_token = django.middleware.csrf.get_token(request) 
                 return render(request,"core/order_checkout.html",
                 {"csrf_token": csrf_token ,
+                "order_checkout": 1,
                 "object" : order,
                 "address_list": address
                 })
@@ -865,3 +868,7 @@ def search(request):
     except Exception as e:
         print(str(e))
         pass
+
+def New_address(request):
+    return render("core/beverages.html",{'form':AddressForm})
+    

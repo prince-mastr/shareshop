@@ -34,7 +34,8 @@ from core.api.views import (
     SharelistAPI,
     search,
     QuantityShareUpdate,
-    shareoutpage
+    shareoutpage,
+    New_address,
 
 )
 
@@ -78,7 +79,8 @@ urlpatterns = [
     path('category/<int:categoryid>/', Categorypage, name="category-page"),
     path('checkout/<int:orderid>/', Checkoutpage, name="checkout_page"),
     path('shareout/<int:shareid>/', shareoutpage, name="share_out_page"),
-    path('search/', search, name="search" )
+    path('search/', search, name="search" ),
+    path('add-new-address/', New_address, name="new_address")
 
 
 ]

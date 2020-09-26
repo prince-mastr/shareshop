@@ -1,91 +1,227 @@
-{% extends 'layouts/default/page.html' %}
-{% load static %}
 
-{% block content %}
-                <div class="container">
-                <div class="col my-4">
-                    <br>
-                    <h2>Step 2 - Enter Address & Other Details:</h2>
-                    <br>
-                    {% if order_checkout %}
-                    <form  method="post" action="{% url 'place-order-now' object.id %}">{% csrf_token %}
-                        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-                        <input type="hidden" name="order" value="{{object.id}}">
-                        <div class="form-row">
-                            <div class="form-group col-md-6">
-                                <label for="inputname">Name</label>
-                                <input type="text" class="form-control" id="name" name="name" placeholder="Name" value="{{request.user}}">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="billing_address">Billing Address</label>
-                            <select class="js-example-basic-single" name="billing_address" id="brand">
-                                <option value="Z">Select a Billing address</option>
-                                {% for address in address_list %}
-                                <option value="{{ address.id}}">{{ address.street_address }}</option>
-                                {% endfor %}
-                                </select> <br>
-                        </div>
-                        <div class="form-group">
-                            <label for="shipping_address">Shipping Address</label>
-                            <select class="js-example-basic-single" name="shipping_address" id="brand">
-                                <option value="Z">Select a Shipping address</option>
-                                {% for address in address_list %}
-                                <option value="{{ address.id}}">{{ address.street_address }}</option>
-                                {% endfor %}
-                                </select> <br>
-                        </div>
-                        <div class="form-group">
-                            <label for="inputZip">GST Number</label>
-                            <input type="tel" class="form-control" id="phone" name="phone">
-                        </div>
-                        <div class="form-group">
-                            <label for="inputZip">Phone Number</label>
-                            <input type="tel" class="form-control" id="phone" name="phone">
-                        </div>
-                        <button type ="submit" id="demo1" class="btn btn-primary"> Place Order</button>
-                    </form>
-                    {% elif share_checkout %}
-                    <form  method="post" action="{% url 'share_list_url' %}">{% csrf_token %}
-                        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-                        <input type="hidden" name="share" value="{{object.id}}">
-                        <div class="form-row">
-                            <div class="form-group col-md-6">
-                                <label for="inputname">Name</label>
-                                <input type="text" class="form-control" id="name" name="name" placeholder="Name" value="{{request.user}}">
-                            </div>
-                        </div>
-                        <br>
-                        <div class="form-row">
-                            <div class="form-group col-md-6">
-                            <label  for="shipping_address">User :</label>
-                            <select class="js-example-basic-single" name="shared_user" id="brand">
-								<option value="Z">Select a User</option>
-								{% for user in user_list %}
-								<option value="{{ user.username}}">{{ user.username }}</option>
-								{% endfor %}
-                                </select> <br>
-                        </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group col-md-6">
-                                <label for="enddate">Valid Input Time</label>
-                                <input type="datetime-local" name = "enddate" class="form-control">
-                            </div>
-                        </div>
-                        
-                        <button type ="submit" id="demo1" class="btn btn-primary"> Share Now</button>
-                    </form>
-                    {% endif %}
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+body {
+  font-family: Arial;
+  font-size: 17px;
+  padding: 8px;
+}
 
+* {
+  box-sizing: border-box;
+}
+
+.row {
+  display: -ms-flexbox; /* IE10 */
+  display: flex;
+  -ms-flex-wrap: wrap; /* IE10 */
+  flex-wrap: wrap;
+  margin: 0 -16px;
+}
+
+.col-25 {
+  -ms-flex: 25%; /* IE10 */
+  flex: 25%;
+}
+
+.col-50 {
+  -ms-flex: 50%; /* IE10 */
+  flex: 50%;
+}
+
+.col-75 {
+  -ms-flex: 75%; /* IE10 */
+  flex: 75%;
+}
+
+.col-25,
+.col-50,
+.col-75 {
+  padding: 0 16px;
+}
+
+.container {
+  background-color: #ffffff;
+  padding: 5px 20px 15px 20px;
+  border: 1px solid lightgrey;
+  border-radius: 3px;
+}
+
+input[type=text] {
+  width: 100%;
+  margin-bottom: 20px;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+label {
+  margin-bottom: 10px;
+  display: block;
+}
+
+.icon-container {
+  margin-bottom: 20px;
+  padding: 7px 0;
+  font-size: 24px;
+}
+
+.btn {
+  background-color: #4CAF50;
+  color: white;
+  padding: 12px;
+  margin: 10px 0;
+  border: none;
+  width: 100%;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 17px;
+}
+
+.btn:hover {
+  background-color: #45a049;
+}
+
+a {
+  color: #2196F3;
+}
+
+hr {
+  border: 1px solid lightgrey;
+}
+
+span.price {
+  float: right;
+  color: grey;
+}
+
+/* Responsive layout - when the screen is less than 800px wide, make the two columns stack on top of each other instead of next to each other (also change the direction - make the "cart" column go on top) */
+@media (max-width: 800px) {
+  .row {
+    flex-direction: column-reverse;
+  }
+  .col-25 {
+    margin-bottom: 20px;
+  }
+}
+</style>
+</head>
+<body>
+<h2>Step 2 - Enter Address & Other Details:</h2>
+<div class="row">
+    <div class="col-75">
+      <div class="container">
+        {% if order_checkout %}
+        <form  method="post" action="{% url 'place-order-now' object.id %}">{% csrf_token %}
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+            <input type="hidden" name="order" value="{{object.id}}">
+                    
+        
+          <div class="row">
+            <div class="col-50">
+              <label for="inputname">Name</label>
+              <input type="text" class="form-control" id="name" name="name" placeholder="Name" value="{{request.user}}">
+              <label for="inputZip">GST Number</label>
+              <input type="tel" class="form-control" id="phone" name="phone">
+              <label for="inputZip">Phone Number</label>
+              <input type="tel" class="form-control" id="phone" name="phone">
+              <div class="row">
+                <div class="col-50">
+                    <label for="billing_address">Billing Address</label>
+                    <input type="checkbox" checked="unchecked" name="newadr" id="newcheck" onclick="myFunction()"> New Address
+                    <select  name="billing_address" id="billing_address">
+                        <option value="Z">Select a Billing address</option>
+                        {% for address in address_list %}
+                        <option value="{{ address.id}}">{{ address.street_address }}</option>
+                        {% endfor %}
+                        </select> 
+                        <div class="form-row field-street_address">
+                            <div>
+                            <label class="required" for="id_street_address">Street address:</label>
+                             <input type="text" name="street_address" class="vTextField" maxlength="100" required="" id="id_street_address">
+                            </div>
+                        </div>
                 </div>
+                <div class="col-50">
+                    <label for="shipping_address">Shipping Address</label>
+                    <select  name="shipping_address" id="brand">
+                        <option value="Z">Select a Shipping address</option>
+                        {% for address in address_list %}
+                        <option value="{{ address.id}}">{{ address.street_address }}</option>
+                        {% endfor %}
+                        </select>
+                </div>
+              </div>
             </div>
-        </div>
-        </section>
+          </div>
+          <button type ="submit" id="demo1" class="btn btn-primary"> Share Now</button>
+        </form>
+        {% elif share_checkout %}
+        <form  method="post" action="{% url 'share_list_url' %}">{% csrf_token %}
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+            <input type="hidden" name="share" value="{{object.id}}">
+            <div class="row">
+                <div class="col-50">
+                    <label for="inputname">Name</label>
+                    <input type="text" class="form-control" id="name" name="name" placeholder="Name" value="{{request.user}}">
+                    <label for="enddate">Valid Input Time</label>
+                    <input type="datetime-local" name = "enddate" class="form-control">
+                    <label for="inputZip">Phone Number</label>
+                    <input type="tel" class="form-control" id="phone" name="phone">
+                    <div class="row">
+                    <div class="col-50">
+                        <label  for="shipping_address">User :</label>
+                        <select class="js-example-basic-single" name="shared_user" id="brand">
+                            <option value="Z">Select a User</option>
+                            {% for user in user_list %}
+                            <option value="{{ user.username}}">{{ user.username }}</option>
+                            {% endfor %}
+                        </select> 
+                    </div>
+                    <div class="col-50">
+                        <label for="shipping_address">Shipping Address</label>
+                        <select  name="shipping_address" id="brand">
+                            <option value="Z">Select a Shipping address</option>
+                            {% for address in address_list %}
+                            <option value="{{ address.id}}">{{ address.street_address }}</option>
+                            {% endfor %}
+                            </select>
+                    </div>
+                    </div>
+                </div>
+                </div>
+            <button type ="submit" id="demo1" class="btn btn-primary"> Share Now</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+    <div class="col-25">
+      <div class="container">
+        <h4>Cart <span class="price" style="color:black"><i class="fa fa-shopping-cart"></i> <b>4</b></span></h4>
+        {% for item in object.items.all %}
+        <p><a href="{{item.item.get_absolute_url}}">{{ item.item.title }}</a> <span class="price">{{item.get_total_item_price}}</span></p>
+        <hr>
+        {% endfor %}
+        <p>Total <span class="price" style="color:black"><b>{{object.get_total}}</b></span></p>
+      </div>
+    </div>
+  </div>
+    
         
-       
-       
-        <script src="https://notouchhandsanatizer.herokuapp.com/static/js/scripts.js"></script>
-        
-        
-{% endblock %}
+  <script>
+    function myFunction() {
+      var checkBox = document.getElementById("newcheck");
+      var text = document.getElementById("billing_address");
+      if (checkBox.checked == true){
+        text.style.display = "none";
+      } else {
+         text.style.display = "block";
+      }
+    }
+    </script>       
+</body>
+</html>

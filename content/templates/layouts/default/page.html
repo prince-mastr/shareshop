@@ -33,6 +33,7 @@ Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, Sony
 
 </script>
 
+
 <!-- //js -->
 <link href='//fonts.googleapis.com/css?family=Raleway:400,100,100italic,200,200italic,300,400italic,500,500italic,600,600italic,700,700italic,800,800italic,900,900italic' rel='stylesheet' type='text/css'>
 <link href='//fonts.googleapis.com/css?family=Open+Sans:400,300,300italic,400italic,600,600italic,700,700italic,800,800italic' rel='stylesheet' type='text/css'>
@@ -47,6 +48,7 @@ Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, Sony
 		});
 	});
 </script>
+
 <style>
 	*{
     box-sizing: border-box;
@@ -432,17 +434,6 @@ h2{
         var URL1 = "{% url 'quantityshareupdate' %}";
     </script>
 <!-- //here ends scrolling icon -->
-<script src="{% static 'js/minicart.min.js' %}"></script>
-<script>
-	// Mini Cart
-	paypal.minicart.render({
-		action: '#'
-	});
-
-	if (~window.location.search.indexOf('reset=true')) {
-		paypal.minicart.reset();
-	}
-</script>
 <!-- main slider-banner -->
 <script src="{% static 'js/skdslider.min.js' %}"></script>
 <link href="{% static 'css/skdslider.css' %}" rel="stylesheet">
