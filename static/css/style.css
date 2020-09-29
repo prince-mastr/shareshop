@@ -85,7 +85,7 @@ input[type="submit"],#PPMiniCart .minicart-submit,.w3ls_vegetables ul li a,input
     color: #fff;
 }
 .w3l_offers p a {
-    color: #fe9126;
+    color: #00e58b;
     text-decoration: none;
 }
 .w3l_search {
@@ -190,7 +190,7 @@ button.w3view-cart:focus{
 }
 .w3ls_logo_products_left h1 a{
 	font-size: 40px;
-    color: #fe9126;
+    color: #006eff;
     text-decoration: none;
     text-transform: uppercase;
     display: block;

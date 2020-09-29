@@ -827,14 +827,16 @@ def search(request):
         queryset = Sharelist.objects.filter(shared_user = request.user,share__shared = True,share__items__item__stock= True)
         Item_qs = queryset
     try:
-        for q in query_list:
-            search_list = search_list + list(Item_qs.filter(
-                Q(share__items__item__title__icontains=q)))
-        for q in query_list:
-            search_list = search_list + list(Item_qs.filter(
-                Q(share__items__item__description__icontains=q)))
-        
         if request.user.userprofile.owner:
+            for q in query_list:
+                search_list = search_list + list(Item_qs.filter(
+                    Q(title__icontains=q)))
+            for q in query_list:
+                search_list = search_list + list(Item_qs.filter(
+                    Q(description__icontains=q)))
+            for q in query_list:
+                search_list = search_list + list(Item_qs.filter(
+                    Q(category__name__icontains=q)))
             if len(search_list):
                 page = request.GET.get('page', 1)
                 paginator = Paginator(list(set(search_list)), 10)
@@ -846,7 +848,16 @@ def search(request):
                     users = paginator.page(paginator.num_pages)
                 return render(request,"core/products.html",{"object_list":users, "csrf_token": csrf_token})
             return render(request,"core/products.html",{"object_list":0,"No_search_found":1,"csrf_token": csrf_token})
+
+
         else:
+            for q in query_list:
+                search_list = search_list + list(Item_qs.filter(
+                    Q(title__icontains=q)))
+            for q in query_list:
+                search_list = search_list + list(Item_qs.filter(
+                    Q(description__icontains=q)))
+            
             if len(search_list):
                 items=[]
                 for my_sharelist in search_list:
@@ -867,7 +878,7 @@ def search(request):
 
     except Exception as e:
         print(str(e))
-        pass
+        return redirect('index')
 
 def New_address(request):
     return render("core/beverages.html",{'form':AddressForm})
