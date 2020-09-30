@@ -68,22 +68,27 @@ Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, Sony
 		<div class="container">
 		<div class="w3ls_logo_products_left1">
 				<ul class="phone_email">
-					<li><i class="fa fa-phone" aria-hidden="true"></i>Order online or call us : (+0123) 234 567</li>
+                    <li><i class="fa fa-phone" aria-hidden="true"></i>Order online or call us : +919377898938 </li>
+                    <br>
+                    <strong><li><i class="fa fa-university" aria-hidden="true"></i>GST NO 24APPPA5866A2Z2</li> </strong>
 					
 				</ul>
 			</div>
 			<div class="w3ls_logo_products_left">
-				<h1><a href="{% url 'index' %}">Surat Saree</a></h1>
-			</div>
+				<h1><a href="{% url 'index' %}">Shree Shyam Silk Mills</a></h1>
+            </div>
+            {% if request.user.is_authenticated %}
 		<div class="w3l_search">
-			<form action="#" method="post">
-				<input type="search" name="Search" placeholder="Search for a Product..." required="">
+			<form action="{% url 'search' %}" method="post">
+                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                <input type="search" name="search" placeholder="Search for a Product..." required="">
 				<button type="submit" class="btn btn-default search" aria-label="Left Align">
 					<i class="fa fa-search" aria-hidden="true"> </i>
 				</button>
 				<div class="clearfix"></div>
 			</form>
-		</div>
+        </div>
+        {% endif %}
 			
 			<div class="clearfix"> </div>
 		</div>
