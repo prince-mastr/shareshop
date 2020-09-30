@@ -883,3 +883,5 @@ def search(request):
 def New_address(request):
     return render("core/beverages.html",{'form':AddressForm})
     
+
+

@@ -7,7 +7,7 @@
 		<div class="container">
 			<ol class="breadcrumb breadcrumb1 animated wow slideInLeft" data-wow-delay=".5s">
 				<li><a href="{% url 'index' %}"><span class="glyphicon glyphicon-home" aria-hidden="true"></span>Home</a></li>
-				<li class="active">Products</li>
+				<li class="active">Store</li>
 			</ol>
 		</div>
 	</div>
@@ -118,22 +118,22 @@
 
 			
 				<nav class="numbering">
-				{% if users.has_other_pages %}
+				{% if object_list.has_other_pages %}
 					<ul class="pagination paging">
-						{% if users.has_previous %}
-						<li><a href="?page={{ users.previous_page_number }}">&laquo;</a></li>
+						{% if object_list.has_previous %}
+						<li><a href="?page={{ object_list.previous_page_number }}">&laquo;</a></li>
 						{% else %}
 						<li class="disabled"><span>&laquo;</span></li>
 						{% endif %}
-						{% for i in users.paginator.page_range %}
-						{% if users.number == i %}
+						{% for i in object_list.paginator.page_range %}
+						{% if object_list.number == i %}
 							<li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
 						{% else %}
 							<li><a href="?page={{ i }}">{{ i }}</a></li>
 						{% endif %}
 						{% endfor %}
-						{% if users.has_next %}
-						<li><a href="?page={{ users.next_page_number }}">&raquo;</a></li>
+						{% if object_list.has_next %}
+						<li><a href="?page={{ object_list.next_page_number }}">&raquo;</a></li>
 						{% else %}
 						<li class="disabled"><span>&raquo;</span></li>
 						{% endif %}

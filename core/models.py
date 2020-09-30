@@ -58,7 +58,7 @@ class Item(models.Model):
     price = models.FloatField()
     discount_price = models.FloatField(blank=True, null=True)
     category = models.ForeignKey('Category', null=True, blank=True,on_delete= models.CASCADE)
-    label = models.CharField(choices=LABEL_CHOICES, max_length=1)
+    label = models.CharField(choices=LABEL_CHOICES, max_length=1,blank=True,)
     slug = models.SlugField()
     stock = models.BooleanField(default=True)
     description = models.TextField()
