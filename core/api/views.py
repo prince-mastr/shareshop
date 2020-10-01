@@ -53,32 +53,12 @@ class ItemListView(ListAPIView):
     permission_classes = (IsAuthenticated, )
     serializer_class = ItemSerializer
     def get(self, request, *args, **kwargs):
-        if request.user.userprofile.owner:
-            csrf_token = django.middleware.csrf.get_token(request) 
-            queryset = Item.objects.filter(stock = True)
-            page = request.GET.get('page', 1)
-            paginator = Paginator(queryset, 10)
-            try:
-                users = paginator.page(page)
-            except PageNotAnInteger:
-                users = paginator.page(1)
-            except EmptyPage:
-                users = paginator.page(paginator.num_pages)
-
-            return render(request,"core/products.html",{"object_list":users,
-            "csrf_token": csrf_token})
-        else:
-            csrf_token = django.middleware.csrf.get_token(request)
-            queryset = Sharelist.objects.filter(shared_user = request.user,share__shared = True)
-            items =[]
-            for my_sharelist in queryset:
-                print()
-                for my_share_item in my_sharelist.share.items.all():
-                    if my_share_item.item.stock:
-                        items.append(my_share_item.item)
-            if len(items):
+        if request.user.is_authenticated:
+            if request.user.userprofile.owner:
+                csrf_token = django.middleware.csrf.get_token(request) 
+                queryset = Item.objects.filter(stock = True)
                 page = request.GET.get('page', 1)
-                paginator = Paginator(list(set(items)), 10)
+                paginator = Paginator(queryset, 10)
                 try:
                     users = paginator.page(page)
                 except PageNotAnInteger:
@@ -86,13 +66,36 @@ class ItemListView(ListAPIView):
                 except EmptyPage:
                     users = paginator.page(paginator.num_pages)
 
-
                 return render(request,"core/products.html",{"object_list":users,
                 "csrf_token": csrf_token})
             else:
-                users=[]
-                return render(request,"core/products.html",{"object_list":users,
-                "csrf_token": csrf_token})
+                csrf_token = django.middleware.csrf.get_token(request)
+                queryset = Sharelist.objects.filter(shared_user = request.user,share__shared = True)
+                items =[]
+                for my_sharelist in queryset:
+                    print()
+                    for my_share_item in my_sharelist.share.items.all():
+                        if my_share_item.item.stock:
+                            items.append(my_share_item.item)
+                if len(items):
+                    page = request.GET.get('page', 1)
+                    paginator = Paginator(list(set(items)), 10)
+                    try:
+                        users = paginator.page(page)
+                    except PageNotAnInteger:
+                        users = paginator.page(1)
+                    except EmptyPage:
+                        users = paginator.page(paginator.num_pages)
+
+
+                    return render(request,"core/products.html",{"object_list":users,
+                    "csrf_token": csrf_token})
+                else:
+                    users=[]
+                    return render(request,"core/products.html",{"object_list":users,
+                    "csrf_token": csrf_token})
+        else:
+            return redirect('accounts:login')
             
 
 
@@ -528,8 +531,8 @@ class AddressCreateView(CreateAPIView):
     permission_classes = (IsAuthenticated, )
     serializer_class = AddressSerializer
     template_name = "core/beverages.html"
-    def get_queryset(self):
-        queryset = Address.objects.all()
+    queryset = Address.objects.all()
+    
 
 
 class AddressUpdateView(UpdateAPIView):
@@ -748,31 +751,46 @@ def Categorypage(request, *args, **kwargs):
             None
         )
         category = Category.objects.get(id = category_id)
-        if request.user.is_authenticated:
-            if request.user.userprofile.owner:
-                csrf_token = django.middleware.csrf.get_token(request) 
-                queryset = Item.objects.filter(stock = True, category__id = category_id)
-                return render(request,"core/products.html",{"object_list":queryset,
-                "csrf_token": csrf_token , "category" : category})
-            else:
-                csrf_token = django.middleware.csrf.get_token(request)
-                queryset = Sharelist.objects.filter(shared_user = request.user,share__shared = True ,)
-                items = []
-                date_today = datetime.date.today()
-                for my_sharelist in queryset:
-                    if my_sharelist.share.end_date >= datetime.datetime(year= int(date_today.year), month = int(date_today.month) , day = int(date_today.day) , tzinfo=pytz.UTC):
-                        for my_share_item in my_sharelist.share.items.all():
-                            if my_share_item.item.stock and my_share_item.item.category.id == category_id :
-                                print(my_share_item.item)
-                                items.append(my_share_item.item)
-                return render(request,"core/products.html",
-                    {
-                        "object_list":set(items),
-                        "csrf_token": csrf_token,
-                        "category" : category
-                    })
+        if request.user.userprofile.owner:
+            csrf_token = django.middleware.csrf.get_token(request) 
+            queryset = Item.objects.filter(stock = True , category = category)
+            page = request.GET.get('page', 1)
+            paginator = Paginator(queryset, 10)
+            try:
+                users = paginator.page(page)
+            except PageNotAnInteger:
+                users = paginator.page(1)
+            except EmptyPage:
+                users = paginator.page(paginator.num_pages)
+
+            return render(request,"core/products.html",{"object_list":users,
+            "csrf_token": csrf_token})
         else:
-            return redirect('index')
+            csrf_token = django.middleware.csrf.get_token(request)
+            queryset = Sharelist.objects.filter(shared_user = request.user,share__shared = True)
+            items =[]
+            for my_sharelist in queryset:
+                print()
+                for my_share_item in my_sharelist.share.items.all():
+                    if my_share_item.item.stock and my_share_item.item.category == category :
+                        items.append(my_share_item.item)
+            if len(items):
+                page = request.GET.get('page', 1)
+                paginator = Paginator(list(set(items)), 10)
+                try:
+                    users = paginator.page(page)
+                except PageNotAnInteger:
+                    users = paginator.page(1)
+                except EmptyPage:
+                    users = paginator.page(paginator.num_pages)
+
+
+                return render(request,"core/products.html",{"object_list":users,
+                "csrf_token": csrf_token})
+            else:
+                users=[]
+                return render(request,"core/products.html",{"object_list":users,
+                "csrf_token": csrf_token})
 
 def Checkoutpage(request, *args, **kwargs):
     try:

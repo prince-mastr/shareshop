@@ -69,7 +69,7 @@ class Item(models.Model):
 
     def get_absolute_url(self):
         return reverse("product-detail", kwargs={
-            'slug': self.slug
+            'pk': self.pk
         })
 
     def get_add_to_cart_url(self):

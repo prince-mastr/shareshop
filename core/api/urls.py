@@ -51,7 +51,7 @@ urlpatterns = [
     path('addresses/<pk>/delete/',
          AddressDeleteView.as_view(), name='address-delete'),
     path('products/', ItemListView.as_view(), name='product-list'),
-    path('products/<str:slug>/', ItemDetailView.as_view(), name='product-detail'),
+    path('products/<int:pk>/', ItemDetailView.as_view(), name='product-detail'),
     path('product-out-of-stock/', ProductStock , name='out-of-stock'),
     #path('addtocart/', AddToCartView.as_view(), name='add_to_cart'),
     path('addtocart/<slug>/', add_to_cart, name='add-to-cart'),
