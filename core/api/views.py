@@ -73,7 +73,6 @@ class ItemListView(ListAPIView):
                 queryset = Sharelist.objects.filter(shared_user = request.user,share__shared = True)
                 items =[]
                 for my_sharelist in queryset:
-                    print()
                     for my_share_item in my_sharelist.share.items.all():
                         if my_share_item.item.stock:
                             items.append(my_share_item.item)
@@ -102,6 +101,19 @@ class ItemListView(ListAPIView):
 class ItemDetailView(generic.DetailView):
     model = Item
     template_name = "core/single.html"
+    def get(self, request, *args, **kwargs):
+        try:
+            pk = kwargs.get("pk",None)
+            item = Item.objects.get(id=pk)
+            item_list = Item.objects.filter(category = item.category)
+            related_items = list(item_list)[:4]
+            return render(request, "core/single.html",{"object":item,"object_list":related_items})
+        except Item.DoesNotExist:
+            #messages.warning(self.request, "You do not have an active order")
+            print("hero")
+            return redirect("order-list")
+
+
 
 
 
@@ -137,8 +149,8 @@ class OrderQuantityUpdateView(APIView):
 
 
 
-def add_to_cart(request, slug):
-    item = get_object_or_404(Item, slug=slug)
+def add_to_cart(request, pk):
+    item = get_object_or_404(Item, id=pk)
     order_item, created = OrderItem.objects.get_or_create(
         item=item,
         user=request.user,
@@ -148,7 +160,7 @@ def add_to_cart(request, slug):
     if order_qs.exists():
         order = order_qs[0]
         # check if the order item is in the order
-        if order.items.filter(item__slug=item.slug).exists():
+        if order.items.filter(item__pk=item.pk).exists():
             order_item.quantity =  order_item.quantity  + 1
             order_item.save()
             return redirect(request.META['HTTP_REFERER'])
@@ -167,8 +179,8 @@ def add_to_cart(request, slug):
     
 
 
-def add_to_share(request,slug):
-    item = get_object_or_404(Item, slug=slug,stock =True)
+def add_to_share(request, pk):
+    item = get_object_or_404(Item, pk=pk,stock =True)
     share_item, created = SharedItem.objects.get_or_create(
         item=item,
         user=request.user,
@@ -179,7 +191,7 @@ def add_to_share(request,slug):
     if share_qs.exists():
         share = share_qs[0]
         # check if the order item is in the order
-        if share.items.filter(item__slug=item.slug).exists():
+        if share.items.filter(item__pk=item.pk).exists():
             return redirect(request.META['HTTP_REFERER'])
         else:
             share.items.add(share_item)
@@ -217,13 +229,12 @@ class OrderItemDeleteView(DestroyAPIView):
 
 class AddToCartView(APIView):
     def post(self, request, *args, **kwargs):
-        slug = request.data.get('slug', None)
-        print(slug)
+        pk = request.data.get('pk', None)
         variations = request.data.get('variations', [])
-        if slug is None:
+        if pk is None:
             return Response({"message": "Invalid request"}, status=HTTP_400_BAD_REQUEST)
 
-        item = get_object_or_404(Item, slug=slug)
+        item = get_object_or_404(Item, pk=pk)
 
         minimum_variation_count = Variation.objects.filter(item=item).count()
         if len(variations) < minimum_variation_count:
@@ -287,7 +298,6 @@ class OrderDetailView(RetrieveAPIView):
             return render(self.request, 'core/checkout.html', context)
         except ObjectDoesNotExist:
             #messages.warning(self.request, "You do not have an active order")
-            print("hero")
             return redirect("order-list")
 
 class OrderListView(RetrieveAPIView):
@@ -753,7 +763,11 @@ def Categorypage(request, *args, **kwargs):
         category = Category.objects.get(id = category_id)
         if request.user.userprofile.owner:
             csrf_token = django.middleware.csrf.get_token(request) 
-            queryset = Item.objects.filter(stock = True , category = category)
+            query = Q(stock = True)
+            query.add(Q(category = category), Q.AND)
+            query.add(Q(category__parent = category), Q.OR,)
+            query.add(Q(category__parent__parent = category), Q.OR,)
+            queryset = Item.objects.filter(query)
             page = request.GET.get('page', 1)
             paginator = Paginator(queryset, 10)
             try:
@@ -767,7 +781,12 @@ def Categorypage(request, *args, **kwargs):
             "csrf_token": csrf_token})
         else:
             csrf_token = django.middleware.csrf.get_token(request)
-            queryset = Sharelist.objects.filter(shared_user = request.user,share__shared = True)
+            query = Q(stock = True)
+            query.add(Q(category = category), Q.AND)
+            query.add(Q(category__parent = category), Q.OR,)
+            query.add(Q(category__parent__parent = category), Q.OR,)
+
+            queryset = Sharelist.objects.filter(query)
             items =[]
             for my_sharelist in queryset:
                 print()
@@ -835,68 +854,72 @@ def shareoutpage(request, *args, **kwargs):
 
             
 def search(request):
-    query = request.POST["search"]
-    query_list = query.split()
-    search_list = []
-    csrf_token = django.middleware.csrf.get_token(request)
-    if request.user.userprofile.owner:
-        Item_qs = Item.objects.all()
-    else:
-        queryset = Sharelist.objects.filter(shared_user = request.user,share__shared = True,share__items__item__stock= True)
-        Item_qs = queryset
-    try:
+    if request.method == "POST":
+        query = request.POST["search"]
+        query_list = query.split()
+        search_list = []
+        csrf_token = django.middleware.csrf.get_token(request)
         if request.user.userprofile.owner:
-            for q in query_list:
-                search_list = search_list + list(Item_qs.filter(
-                    Q(title__icontains=q)))
-            for q in query_list:
-                search_list = search_list + list(Item_qs.filter(
-                    Q(description__icontains=q)))
-            for q in query_list:
-                search_list = search_list + list(Item_qs.filter(
-                    Q(category__name__icontains=q)))
-            if len(search_list):
-                page = request.GET.get('page', 1)
-                paginator = Paginator(list(set(search_list)), 10)
-                try:
-                    users = paginator.page(page)
-                except PageNotAnInteger:
-                    users = paginator.page(1)
-                except EmptyPage:
-                    users = paginator.page(paginator.num_pages)
-                return render(request,"core/products.html",{"object_list":users, "csrf_token": csrf_token})
-            return render(request,"core/products.html",{"object_list":0,"No_search_found":1,"csrf_token": csrf_token})
-
-
+            Item_qs = Item.objects.all()
         else:
-            for q in query_list:
-                search_list = search_list + list(Item_qs.filter(
-                    Q(title__icontains=q)))
-            for q in query_list:
-                search_list = search_list + list(Item_qs.filter(
-                    Q(description__icontains=q)))
-            
-            if len(search_list):
-                items=[]
-                for my_sharelist in search_list:
-                    for my_share_item in my_sharelist.share.items.all():
-                        if my_share_item.item.stock:
-                            items.append(my_share_item.item)
-                page = request.GET.get('page', 1)
-                paginator = Paginator(list(set(items)), 10)
-                try:
-                    users = paginator.page(page)
-                except PageNotAnInteger:
-                    users = paginator.page(1)
-                except EmptyPage:
-                    users = paginator.page(paginator.num_pages)
-                return render(request,"core/products.html",{"object_list":users, "csrf_token": csrf_token})
-            return render(request,"core/products.html",{"object_list":0,"No_search_found":1,"csrf_token": csrf_token})
-                
+            queryset = Sharelist.objects.filter(shared_user = request.user,share__shared = True,share__items__item__stock= True)
+            Item_qs = queryset
+        try:
+            if request.user.userprofile.owner:
+                for q in query_list:
+                    search_list = search_list + list(Item_qs.filter(
+                        Q(title__icontains=q)))
+                for q in query_list:
+                    search_list = search_list + list(Item_qs.filter(
+                        Q(description__icontains=q)))
+                for q in query_list:
+                    search_list = search_list + list(Item_qs.filter(
+                        Q(category__name__icontains=q)))
+                if len(search_list):
+                    page = request.GET.get('page', 1)
+                    paginator = Paginator(list(set(search_list)), 10)
+                    try:
+                        users = paginator.page(page)
+                    except PageNotAnInteger:
+                        users = paginator.page(1)
+                    except EmptyPage:
+                        users = paginator.page(paginator.num_pages)
+                    return render(request,"core/products.html",{"object_list":users, "csrf_token": csrf_token})
+                return render(request,"core/products.html",{"object_list":0,"No_search_found":1,"csrf_token": csrf_token})
 
-    except Exception as e:
-        print(str(e))
+
+            else:
+                for q in query_list:
+                    search_list = search_list + list(Item_qs.filter(
+                        Q(title__icontains=q)))
+                for q in query_list:
+                    search_list = search_list + list(Item_qs.filter(
+                        Q(description__icontains=q)))
+                
+                if len(search_list):
+                    items=[]
+                    for my_sharelist in search_list:
+                        for my_share_item in my_sharelist.share.items.all():
+                            if my_share_item.item.stock:
+                                items.append(my_share_item.item)
+                    page = request.GET.get('page', 1)
+                    paginator = Paginator(list(set(items)), 10)
+                    try:
+                        users = paginator.page(page)
+                    except PageNotAnInteger:
+                        users = paginator.page(1)
+                    except EmptyPage:
+                        users = paginator.page(paginator.num_pages)
+                    return render(request,"core/products.html",{"object_list":users, "csrf_token": csrf_token})
+                return render(request,"core/products.html",{"object_list":0,"No_search_found":1,"csrf_token": csrf_token})
+                    
+
+        except Exception as e:
+            print(str(e))
+            return redirect('index')
+    else:
         return redirect('index')
+
 
 def New_address(request):
     return render("core/beverages.html",{'form':AddressForm})

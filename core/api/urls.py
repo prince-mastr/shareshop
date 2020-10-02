@@ -54,8 +54,8 @@ urlpatterns = [
     path('products/<int:pk>/', ItemDetailView.as_view(), name='product-detail'),
     path('product-out-of-stock/', ProductStock , name='out-of-stock'),
     #path('addtocart/', AddToCartView.as_view(), name='add_to_cart'),
-    path('addtocart/<slug>/', add_to_cart, name='add-to-cart'),
-    path('addtoshare/<slug>/', add_to_share, name='add-to-share'),
+    path('addtocart/<int:pk>/', add_to_cart, name='add-to-cart'),
+    path('addtoshare/<int:pk>/', add_to_share, name='add-to-share'),
     path('addtosharecategory/<int:categoryid>/', add_to_share_category ,name = "add_to_share_category" ),
 
     path('order-summary/<int:orderid>/', OrderDetailView.as_view(), name='order-summary'),

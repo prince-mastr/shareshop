@@ -19,8 +19,6 @@ class OrderAdmin(admin.ModelAdmin):
                     'ordered',
                     'being_delivered',
                     'received',
-                    'refund_requested',
-                    'refund_granted',
                     'shipping_address',
                     'billing_address',
                     'payment',
@@ -36,8 +34,7 @@ class OrderAdmin(admin.ModelAdmin):
     list_filter = ['ordered',
                    'being_delivered',
                    'received',
-                   'refund_requested',
-                   'refund_granted']
+                   ]
     search_fields = [
         'user__username',
         'ref_code'
@@ -66,6 +63,9 @@ class ItemVariationAdmin(admin.ModelAdmin):
     list_filter = ['variation', 'variation__item']
     search_fields = ['value']
 
+class ItemAdmin(admin.ModelAdmin):
+    search_fields = ['title']
+
 
 class ItemVariationInLineAdmin(admin.TabularInline):
     model = ItemVariation
@@ -82,7 +82,7 @@ class VariationAdmin(admin.ModelAdmin):
 
 admin.site.register(ItemVariation, ItemVariationAdmin)
 admin.site.register(Variation, VariationAdmin)
-admin.site.register(Item)
+admin.site.register(Item, ItemAdmin)
 admin.site.register(OrderItem)
 admin.site.register(Order, OrderAdmin)
 admin.site.register(SharedItem)

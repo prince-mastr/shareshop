@@ -89,7 +89,7 @@
 													<fieldset>
 														
 														<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-														<input type="hidden" name="slug" value="{{object.slug}}">
+														<input type="hidden" name="pk" value="{{object.pk}}">
 														<input type="hidden" name="cmd" value="_cart">
 														<input type="hidden" name="add" value="1">
 														<input type="hidden" name="business" value=" ">
@@ -150,7 +150,10 @@
 		</div>
 	</div>
 <!--- products --->
+
+
 {% endblock %}
+
 
 {% block footer_scripts %}
 <!-- Bootstrap Core JavaScript -->

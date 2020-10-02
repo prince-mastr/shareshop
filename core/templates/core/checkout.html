@@ -197,6 +197,7 @@
 						</tr>
 					</thead>
 					{% for item in object %}
+					{% if item.get_total %}
 					<tr class="rem{{forloop.counter}}">
 						<td class="invert">{{forloop.counter}}</td>
 						<td class="invert" id = "product{{item.item.id}}">{{item.id}}</td>
@@ -212,6 +213,7 @@
 							{% endif %}
 						</td>
 					</tr>
+					{% endif %}
 					{% endfor %}
 				</table>
 				{% endif %}
@@ -309,7 +311,7 @@
 				</div>
 			</div>
 			{% else %}
-				<h2> Please Add Some Items to Share List </h2>
+				<h2> Please Add Some Items  </h2>
 				<a href="{% url 'product-list'  %}"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Continue Shopping</a>
 				{% endif %}
 			{% endif %}

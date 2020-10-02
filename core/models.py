@@ -75,21 +75,21 @@ class Item(models.Model):
     def get_add_to_cart_url(self):
         print(self.title)
         return reverse("add-to-cart", kwargs={
-            'slug': self.slug
+            'pk': self.pk
         })
     def get_add_to_share_url(self):
         print(self.title)
         return reverse("add-to-share", kwargs={
-            'slug': self.slug
+            'pk': self.pk
         })
 
     def get_remove_from_cart_url(self):
         return reverse("core:remove-from-cart", kwargs={
-            'slug': self.slug
+            'pk': self.pk
         })
     def out_of_stock(self):
         return reverse("out-of-stock", kwargs={
-            'pk': self.id,
+            'pk': self.pk,
         })
 
 
@@ -191,9 +191,6 @@ class Order(models.Model):
         'Coupon', on_delete=models.SET_NULL, blank=True, null=True)
     being_delivered = models.BooleanField(default=False)
     received = models.BooleanField(default=False)
-    refund_requested = models.BooleanField(default=False)
-    refund_granted = models.BooleanField(default=False)
-
     '''
     1. Item added to cart
     2. Adding a billing address
@@ -292,9 +289,4 @@ class Sharelist(models.Model):
 
 
 
-def userprofile_receiver(sender, instance, created, *args, **kwargs):
-    if created:
-        userprofile = UserProfile.objects.create(user=instance)
 
-
-post_save.connect(userprofile_receiver, sender=settings.AUTH_USER_MODEL)

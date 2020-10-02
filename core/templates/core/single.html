@@ -71,11 +71,76 @@
 						</div>
 					</div>
 				</div>
+				
 				<div class="clearfix"> </div>
 			</div>
 		</div>
 	</div>
+	<!--- New --->
+<div class="newproducts-w3agile">
+	<div class="container">
+		<h3>Related Items</h3>
+		{% for item in object_list %}
+			<div class="agile_top_brands_grids">
+				<div class="col-md-3 top_brand_left-1">
+					<div class="hover14 column">
+						<div class="agile_top_brand_left_grid">
+							<div class="agile_top_brand_left_grid_pos">
+								<img src="{% static 'images/offer.png' %}" alt=" " class="img-responsive">
+							</div>
+							<div class="agile_top_brand_left_grid1">
+								<figure>
+									<div class="snipcart-item block">
+										<div class="snipcart-thumb">
+											<a href="{% url 'product-detail' item.id %}"><img title=" " alt=" " height="250" width="250"  src="{{item.image.url}}"></a>		
+											<p>{{item.title}}</p>
+											<div class="stars">
+												<i class="fa fa-star blue-star" aria-hidden="true"></i>
+												<i class="fa fa-star blue-star" aria-hidden="true"></i>
+												<i class="fa fa-star blue-star" aria-hidden="true"></i>
+												<i class="fa fa-star blue-star" aria-hidden="true"></i>
+												<i class="fa fa-star gray-star" aria-hidden="true"></i>
+											</div>
+											<h4>{{item.discount_price}} <span>{{item.price}}</span></h4>
+										</div>
+										<div class="snipcart-details top_brand_home_details">
+											<form action="{{item.get_add_to_cart_url}}" method="post">
+												<fieldset>
+													
+													<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+													<input type="hidden" name="slug" value="{{item.slug}}">
+													<input type="hidden" name="cmd" value="_cart">
+													<input type="hidden" name="add" value="1">
+													<input type="hidden" name="business" value=" ">
+													<input type="hidden" name="item_name" value="{{item.title}}">
+													<input type="hidden" name="amount" value="{{item.discount_price}}">
+													<input type="hidden" name="discount_amount" value="1.00">
+													<input type="hidden" name="currency_code" value="INR">
+													<input type="hidden" name="return" value=" ">
+													<input type="hidden" name="cancel_return" value=" ">
+													<input type="submit" name="submit" id ="{{item.id}}" value="Add to cart" class="button" onclick="myFunction({{item.id}})">
+												</fieldset>
+											</form>
+										</div>
+									</div>
+								</figure>
+							</div>
+						</div>
+					</div>
+				</div>
+					
+		
+			</div>
+			{% endfor %}
+			<a href="{% url 'category-page' object.category.id %}"><h4 style="float: center;"></h4><i class="fa fa-arrow-right" aria-hidden="true"></i>{{object.category.name}}</h4></a>
+		<div class="clearfix"> </div>
+			
+	</div>
+</div>
+<!-- //new -->
 <!-- //footer -->
+
+
 {% endblock %}
 
 {% block footer_scripts %}
