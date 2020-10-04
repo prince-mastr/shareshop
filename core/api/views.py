@@ -777,7 +777,7 @@ def Categorypage(request, *args, **kwargs):
             except EmptyPage:
                 users = paginator.page(paginator.num_pages)
 
-            return render(request,"core/products.html",{"object_list":users,
+            return render(request,"core/products.html",{"object_list":users,"category":category
             "csrf_token": csrf_token})
         else:
             csrf_token = django.middleware.csrf.get_token(request)
@@ -804,11 +804,11 @@ def Categorypage(request, *args, **kwargs):
                     users = paginator.page(paginator.num_pages)
 
 
-                return render(request,"core/products.html",{"object_list":users,
+                return render(request,"core/products.html",{"object_list":users,"category":category
                 "csrf_token": csrf_token})
             else:
                 users=[]
-                return render(request,"core/products.html",{"object_list":users,
+                return render(request,"core/products.html",{"object_list":users,"category":category
                 "csrf_token": csrf_token})
 
 def Checkoutpage(request, *args, **kwargs):
